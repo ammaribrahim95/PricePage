@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing | Pawstrophe Digital</title>
+  <meta name="description" content="Transparent pricing for Malaysian SMEs. Single Page from RM 2,500, Multi-Page from RM 4,800. Free 3 months support included." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+</head>
+<body>
+
+  <!-- ====== NAVIGATION ====== -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon">
+          <span class="material-symbols-outlined">rocket_launch</span>
+        </div>
+        <span class="nav-brand-text">Pawstrophe <span class="accent">Digital</span></span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="pricing.html" class="active">Pricing</a></li>
+          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span class="material-symbols-outlined theme-toggle-icon-dark">dark_mode</span>
+          <span class="material-symbols-outlined theme-toggle-icon-light">light_mode</span>
+        </button>
+        <a href="contact.html" class="btn btn-primary btn-nav-desktop">Get Started</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="services.html">Services</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="faq.html">FAQ</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+
+    <!-- ====== HERO ====== -->
+    <section class="hero" style="padding-bottom:3rem;">
+      <div class="container text-center">
+        <div class="section-eyebrow animate-fade-up" style="justify-content:center;">
+          <span class="dot"></span>
+          Localized Digital Growth
+        </div>
+        <h1 class="hero-headline animate-fade-up delay-100 mx-auto" style="max-width:800px;">
+          Simple, Transparent Pricing for <span class="gradient-text">Local Growth</span>
+        </h1>
+        <p class="hero-subtext animate-fade-up delay-200 mx-auto" style="text-align:center;">
+          Tailored web solutions for Malaysian SMEs to scale effectively. No hidden fees, just pure performance and local expertise.
+        </p>
+      </div>
+    </section>
+
+    <!-- ====== PRICING TOGGLE & CARDS ====== -->
+    <section class="section" style="padding-top:0;">
+      <div class="container">
+
+        <!-- Billing Toggle -->
+        <div class="billing-toggle animate-fade-up">
+          <button class="active" data-plan="onetime">One-Time Project</button>
+          <button data-plan="subscription">Monthly Subscription</button>
+        </div>
+
+        <p class="text-center text-sm text-muted animate-fade-up" style="margin-top:-1.5rem;margin-bottom:3rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:16px;">verified</span>
+          All pricing in MYR. Excludes domain, hosting & third-party API costs.
+        </p>
+
+        <!-- ONE-TIME CARDS -->
+        <div class="grid-3" id="onetime-cards" style="align-items:stretch;">
+
+          <!-- Starter -->
+          <div class="pricing-card animate-fade-up delay-100">
+            <div style="margin-bottom:1.5rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;">Starter</h3>
+              <p class="text-sm text-muted">Single page landing page for rapid conversion.</p>
+            </div>
+            <div style="margin-bottom:1.5rem;">
+              <span class="price-currency">RM</span>
+              <span class="price">2,500</span>
+              <span class="price-period">/one-time</span>
+            </div>
+            <div class="promo-badge">
+              <span class="material-symbols-outlined" style="font-size:16px;">card_giftcard</span>
+              <span>FREE 3 MONTHS SUPPORT</span>
+            </div>
+            <ul class="feature-list flex-grow">
+              <li><span class="material-symbols-outlined">check_circle</span> WhatsApp Integration</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Google Maps & Business Setup</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Mobile Responsive Design</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Contact Form</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Basic Local SEO Optimization</li>
+              <li><span class="material-symbols-outlined">check_circle</span> SSL & Domain Pointing</li>
+            </ul>
+            <a href="contact.html" class="btn btn-secondary w-full">Get Started</a>
+          </div>
+
+          <!-- Growth (Featured) -->
+          <div class="pricing-card featured animate-fade-up delay-200">
+            <div class="badge-best">✦ Best Value</div>
+            <div style="margin-bottom:1.5rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;color:white;">Growth</h3>
+              <p class="text-sm" style="color:#94A3B8;">Full multi-page experience for scaling brands.</p>
+            </div>
+            <div style="margin-bottom:1.5rem;">
+              <span class="price-currency" style="color:#CBD5E1;">RM</span>
+              <span class="price" style="color:white;">4,800</span>
+              <span class="price-period" style="color:#64748B;">/one-time</span>
+            </div>
+            <div class="promo-badge">
+              <span class="material-symbols-outlined" style="font-size:16px;">card_giftcard</span>
+              <span>FREE 3 MONTHS SUPPORT</span>
+            </div>
+            <ul class="feature-list flex-grow">
+              <li><span class="material-symbols-outlined">verified</span> Up to 5 Pages (Home, About, Services, Contact, Gallery)</li>
+              <li><span class="material-symbols-outlined">verified</span> CMS-Ready Structure</li>
+              <li><span class="material-symbols-outlined">verified</span> Advanced SEO Optimization</li>
+              <li><span class="material-symbols-outlined">verified</span> High Performance & Page Speed</li>
+              <li><span class="material-symbols-outlined">verified</span> WhatsApp & Google Maps Integration</li>
+              <li><span class="material-symbols-outlined">verified</span> Custom Design (No Templates)</li>
+              <li><span class="material-symbols-outlined">verified</span> Priority Technical Support</li>
+            </ul>
+            <a href="contact.html" class="btn btn-primary w-full">Choose Growth</a>
+          </div>
+
+          <!-- Maintenance Add-On -->
+          <div class="pricing-card animate-fade-up delay-300">
+            <div style="margin-bottom:1.5rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;">Ongoing Care</h3>
+              <p class="text-sm text-muted">Post-launch maintenance & support plans.</p>
+            </div>
+            <div style="margin-bottom:0.25rem;">
+              <span class="price-currency">RM</span>
+              <span class="price">200</span>
+              <span class="price-period">–350/month</span>
+            </div>
+            <p class="text-xs text-muted" style="margin-bottom:1.5rem;">Depends on plan tier (Starter/Growth)</p>
+            <ul class="feature-list flex-grow">
+              <li><span class="material-symbols-outlined">sync_saved_locally</span> Monthly Security Patching</li>
+              <li><span class="material-symbols-outlined">sync_saved_locally</span> Content Updates (Minor)</li>
+              <li><span class="material-symbols-outlined">sync_saved_locally</span> Uptime Monitoring (24/7)</li>
+              <li><span class="material-symbols-outlined">sync_saved_locally</span> Monthly Performance Reports</li>
+              <li><span class="material-symbols-outlined">sync_saved_locally</span> Priority Bug Fixes</li>
+            </ul>
+            <div style="padding:1rem;background:rgba(37,99,235,0.05);border:1px solid rgba(37,99,235,0.15);border-radius:12px;margin-bottom:1rem;">
+              <p class="text-xs" style="color:var(--royal-blue);font-weight:700;">Change Requests: RM 900/man-day</p>
+            </div>
+            <a href="contact.html" class="btn btn-secondary w-full">Contact Us</a>
+          </div>
+        </div>
+
+        <!-- SUBSCRIPTION CARDS -->
+        <div class="grid-2" id="subscription-cards" style="display:none;max-width:700px;margin:0 auto;align-items:stretch;">
+
+          <!-- Single Page Sub -->
+          <div class="pricing-card animate-fade-up">
+            <div style="margin-bottom:1.5rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;">Single Page</h3>
+              <p class="text-sm text-muted">Monthly subscription for a landing page.</p>
+            </div>
+            <div style="margin-bottom:0.25rem;">
+              <span class="price-currency">RM</span>
+              <span class="price">280</span>
+              <span class="price-period">/month</span>
+            </div>
+            <p class="text-xs text-muted" style="margin-bottom:1.5rem;">Minimum 12-month commitment</p>
+            <ul class="feature-list flex-grow">
+              <li><span class="material-symbols-outlined">check_circle</span> Full Single Page Design & Dev</li>
+              <li><span class="material-symbols-outlined">check_circle</span> WhatsApp + Google Maps</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Basic SEO & Mobile Responsive</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Ongoing Support Included</li>
+              <li><span class="material-symbols-outlined">check_circle</span> Monthly Content Updates</li>
+            </ul>
+            <a href="contact.html" class="btn btn-secondary w-full">Subscribe Now</a>
+          </div>
+
+          <!-- Multi-Page Sub -->
+          <div class="pricing-card featured animate-fade-up delay-100">
+            <div class="badge-best">✦ Best Value</div>
+            <div style="margin-bottom:1.5rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.25rem;color:white;">Multi-Page</h3>
+              <p class="text-sm" style="color:#94A3B8;">Full website on a monthly plan.</p>
+            </div>
+            <div style="margin-bottom:0.25rem;">
+              <span class="price-currency" style="color:#CBD5E1;">RM</span>
+              <span class="price" style="color:white;">450</span>
+              <span class="price-period" style="color:#64748B;">/month</span>
+            </div>
+            <p class="text-xs" style="color:#64748B;margin-bottom:1.5rem;">Minimum 12-month commitment</p>
+            <ul class="feature-list flex-grow">
+              <li><span class="material-symbols-outlined">verified</span> Up to 5 Pages</li>
+              <li><span class="material-symbols-outlined">verified</span> CMS Integration</li>
+              <li><span class="material-symbols-outlined">verified</span> Advanced SEO & Analytics</li>
+              <li><span class="material-symbols-outlined">verified</span> Priority Support Included</li>
+              <li><span class="material-symbols-outlined">verified</span> Quarterly Design Refreshes</li>
+              <li><span class="material-symbols-outlined">verified</span> Performance Monitoring</li>
+            </ul>
+            <a href="contact.html" class="btn btn-primary w-full">Subscribe Now</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====== MAINTENANCE & MAN-DAY ====== -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="grid-2" style="align-items:center;">
+          <div class="animate-fade-up">
+            <h2 class="section-title">Built to Last, <span class="gradient-text">Managed with Care</span></h2>
+            <p class="section-subtitle" style="margin-bottom:2rem;">Beyond the initial build, we offer transparent rates for long-term sustainability. No locking you into expensive proprietary systems.</p>
+
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+              <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;">
+                <span class="font-bold">Standard Maintenance</span>
+                <span style="color:var(--royal-blue);font-weight:800;">RM 200 – 350 /mo</span>
+              </div>
+              <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;">
+                <span class="font-bold">Technical Man-Day Rate</span>
+                <span style="color:var(--royal-blue);font-weight:800;">RM 900</span>
+              </div>
+              <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;">
+                <span class="font-bold">Emergency Support (After Hours)</span>
+                <span style="color:var(--soft-gold);font-weight:800;">RM 1,350</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="animate-fade-up delay-200">
+            <div class="testimonial-card" style="margin-top:2rem;">
+              <p class="testimonial-text">"Pawstrophe Digital reduced our site downtime by 98% in the first month. Their maintenance plan is non-negotiable for our growth."</p>
+              <p class="testimonial-author">Ahmad Razali</p>
+              <p class="testimonial-role">Founder, KL Retail Hub</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== ROI / TRUST ====== -->
+    <section class="section">
+      <div class="container">
+        <div class="text-center mb-8 animate-fade-up">
+          <h2 class="section-title mx-auto">Why Local SMEs <span class="gradient-text">Trust Us</span></h2>
+          <p class="section-subtitle mx-auto">We don't just build websites; we build business tools that generate Return on Investment.</p>
+        </div>
+        <div class="grid-4 animate-fade-up delay-100">
+          <div class="card" style="text-align:center;padding:1.5rem;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--royal-blue);margin-bottom:1rem;">speed</span>
+            <h4 style="font-weight:700;margin-bottom:0.5rem;">3s Load Time</h4>
+            <p class="text-xs text-muted">Optimized for local Malaysian networks (Maxis, TM, Celcom).</p>
+          </div>
+          <div class="card" style="text-align:center;padding:1.5rem;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--electric-teal);margin-bottom:1rem;">smartphone</span>
+            <h4 style="font-weight:700;margin-bottom:0.5rem;">Mobile First</h4>
+            <p class="text-xs text-muted">Over 80% of local traffic is mobile. We ensure a flawless experience.</p>
+          </div>
+          <div class="card" style="text-align:center;padding:1.5rem;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--soft-gold);margin-bottom:1rem;">support_agent</span>
+            <h4 style="font-weight:700;margin-bottom:0.5rem;">Local Support</h4>
+            <p class="text-xs text-muted">Same timezone, same culture. We understand the local market nuances.</p>
+          </div>
+          <div class="card" style="text-align:center;padding:1.5rem;">
+            <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--royal-blue);margin-bottom:1rem;">trending_up</span>
+            <h4 style="font-weight:700;margin-bottom:0.5rem;">Scalable Tech</h4>
+            <p class="text-xs text-muted">We use modern stacks that grow as your business grows.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== COMPARISON TABLE ====== -->
+    <section class="section section-alt">
+      <div class="container">
+        <h2 class="section-title text-center mx-auto mb-8 animate-fade-up">Deep Dive <span class="gradient-text">Comparison</span></h2>
+        <div class="animate-fade-up delay-100" style="max-width:800px;margin:0 auto;overflow-x:auto;border-radius:20px;border:1px solid var(--border-color);box-shadow:var(--shadow-md);">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Starter (RM 2,500)</th>
+                <th>Growth (RM 4,800)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;">Design System</td>
+                <td>Professional Template-based</td>
+                <td class="highlight">100% Bespoke Design</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">Pages</td>
+                <td>1 Landing Page</td>
+                <td class="highlight">Up to 5 Custom Pages</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">Content Management</td>
+                <td>Static (Managed by us)</td>
+                <td class="highlight">Included CMS Dashboard</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">SEO Audit</td>
+                <td>Baseline Setup</td>
+                <td class="highlight">Advanced Strategy + Copy</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">WhatsApp & Maps</td>
+                <td>✓ Included</td>
+                <td class="highlight">✓ Included + Analytics</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">Turnaround Time</td>
+                <td>7–10 Working Days</td>
+                <td>15–20 Working Days</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">Free Support</td>
+                <td>3 Months</td>
+                <td class="highlight">3 Months (Priority)</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;">Post-Support Maintenance</td>
+                <td>RM 200/month</td>
+                <td>RM 350/month</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== FAQ ====== -->
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title text-center mx-auto mb-8 animate-fade-up">Frequently Asked <span class="gradient-text">Questions</span></h2>
+
+        <div style="max-width:700px;margin:0 auto;">
+          <div class="faq-item animate-fade-up delay-100">
+            <button class="faq-question">
+              Does the price include Domain and Hosting?
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                No, we separate development from hosting to give you 100% ownership. We can recommend and set up local providers like Exabytes or Shinjiru, usually costing RM 300–500 annually for domain and hosting.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item animate-fade-up delay-200">
+            <button class="faq-question">
+              How do the maintenance costs work?
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Maintenance covers core updates, security patches, and monthly backups. RM 200 is for Starter sites, while RM 350 covers Growth sites with CMS and frequent traffic monitoring needs.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item animate-fade-up delay-300">
+            <button class="faq-question">
+              Can I upgrade from Starter to Growth later?
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Absolutely. We build our Starter sites on the same clean foundations as our Growth sites, making scalability seamless when you're ready to expand. The upgrade cost will be adjusted accordingly.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item animate-fade-up delay-400">
+            <button class="faq-question">
+              What does the RM 900/man-day rate cover?
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                The man-day rate applies to change requests and additional features outside the original scope of work. This covers design changes, new page additions, API integrations, or any structural modifications.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== FINAL CTA ====== -->
+    <section class="section">
+      <div class="container">
+        <div class="cta-section animate-fade-up">
+          <div style="position:relative;z-index:1;">
+            <div class="scarcity-badge" style="margin:0 auto 1.5rem;width:fit-content;">
+              <span class="pulse"></span>
+              Limited to 4 Clients per Month
+            </div>
+            <h2 style="font-size:2.5rem;font-weight:900;margin-bottom:1rem;color:white;">Secure Your Slot <span class="gradient-text">Today</span></h2>
+            <p style="color:#94A3B8;max-width:520px;margin:0 auto 2rem;">
+              To maintain high performance and personalized service for every local business, we strictly limit our monthly intake. We currently have <strong style="color:var(--electric-teal);">2 slots remaining</strong> this month.
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;">
+              <a href="contact.html" class="btn btn-primary btn-lg">Book a Consultation</a>
+              <a href="portfolio.html" class="btn btn-ghost btn-lg" style="color:white;">View Portfolio</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="nav-brand" style="margin-bottom:0.5rem;">
+            <div class="nav-brand-icon"><span class="material-symbols-outlined">rocket_launch</span></div>
+            <span class="nav-brand-text">Pawstrophe <span class="accent">Digital</span></span>
+          </a>
+          <p class="footer-brand-desc">Premium digital agency based in Kuala Lumpur, dedicated to helping Malaysian SMEs thrive in the digital age.</p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Services</h4>
+          <ul class="footer-links">
+            <li><a href="services.html">Web Design</a></li>
+            <li><a href="services.html">Multi-Page Sites</a></li>
+            <li><a href="services.html">Local SEO</a></li>
+            <li><a href="services.html">Maintenance</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Company</h4>
+          <ul class="footer-links">
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="terms.html">Terms & Conditions</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-heading">Contact Info</h4>
+          <ul class="footer-links">
+            <li style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="material-symbols-outlined" style="font-size:16px;color:var(--royal-blue);">location_on</span>
+              Kuala Lumpur, Malaysia
+            </li>
+            <li style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="material-symbols-outlined" style="font-size:16px;color:var(--royal-blue);">mail</span>
+              theapawstrophe@gmail.com
+            </li>
+            <li style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="material-symbols-outlined" style="font-size:16px;color:var(--royal-blue);">phone</span>
+              012-795 3577
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copyright">© 2026 Pawstrophe Digital. All rights reserved.</p>
+        <div class="footer-legal-links">
+          <a href="terms.html">Terms of Service</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/60127953577" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    <span class="material-symbols-outlined">chat</span>
+  </a>
+
+  <script src="main.js"></script>
+</body>
+</html>

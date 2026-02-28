@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact | Pawstrophe Digital</title>
+  <meta name="description" content="Get in touch with Pawstrophe Digital. Book a free strategy session, WhatsApp us, or send an enquiry. Based in Kuala Lumpur, Malaysia." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon"><span class="material-symbols-outlined">rocket_launch</span></div>
+        <span class="nav-brand-text">Pawstrophe <span class="accent">Digital</span></span>
+      </a>
+      <nav><ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="portfolio.html">Portfolio</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul></nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <span class="material-symbols-outlined theme-toggle-icon-dark">dark_mode</span>
+          <span class="material-symbols-outlined theme-toggle-icon-light">light_mode</span>
+        </button>
+        <a href="contact.html" class="btn btn-primary btn-nav-desktop">Get Started</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu"><span class="material-symbols-outlined">menu</span></button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a><a href="services.html">Services</a><a href="pricing.html">Pricing</a>
+    <a href="portfolio.html">Portfolio</a><a href="faq.html">FAQ</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container text-center">
+        <div class="section-eyebrow animate-fade-up" style="justify-content:center;"><span class="dot"></span> Let's Talk</div>
+        <h1 class="hero-headline animate-fade-up delay-100 mx-auto" style="max-width:700px;">
+          Start Your <span class="gradient-text">Digital Transformation</span>
+        </h1>
+        <p class="hero-subtext animate-fade-up delay-200 mx-auto" style="text-align:center;">
+          Book a free strategy session. We'll respond within 24 hours with a tailored project roadmap.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Content -->
+    <section class="section" style="padding-top:0;">
+      <div class="container">
+        <div class="grid-2" style="gap:4rem;align-items:start;">
+
+          <!-- Contact Form -->
+          <div class="animate-fade-up">
+            <div class="card" style="padding:2.5rem;">
+              <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">Send Us a Message</h2>
+              <p class="text-sm text-muted" style="margin-bottom:2rem;">Fill in the form below and we'll get back to you within 24 hours.</p>
+
+              <form id="contact-form" onsubmit="return false;">
+                <div class="grid-2" style="gap:1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="name">Full Name *</label>
+                    <input class="form-input" type="text" id="name" placeholder="Ahmad Razali" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input class="form-input" type="tel" id="phone" placeholder="012-795 3577" required />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="email">Email Address *</label>
+                  <input class="form-input" type="email" id="email" placeholder="you@company.com" required />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="business">Business Name</label>
+                  <input class="form-input" type="text" id="business" placeholder="Your Company Sdn Bhd" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="service">Service Interested In *</label>
+                  <select class="form-input" id="service" required>
+                    <option value="">Select a service…</option>
+                    <option value="single">Single Page Website (From RM 2,500)</option>
+                    <option value="multi">Multi-Page Website (From RM 4,800)</option>
+                    <option value="sub-single">Subscription – Single Page (RM 280/mo)</option>
+                    <option value="sub-multi">Subscription – Multi-Page (RM 450/mo)</option>
+                    <option value="maintenance">Maintenance Plan</option>
+                    <option value="other">Other / Not Sure</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="budget">Estimated Budget (MYR)</label>
+                  <select class="form-input" id="budget">
+                    <option value="">Select range…</option>
+                    <option value="<3000">Below RM 3,000</option>
+                    <option value="3000-5000">RM 3,000 – RM 5,000</option>
+                    <option value="5000-10000">RM 5,000 – RM 10,000</option>
+                    <option value=">10000">Above RM 10,000</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="message">Project Details *</label>
+                  <textarea class="form-textarea" id="message" placeholder="Tell us about your project, goals, and timeline…" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top:0.5rem;">
+                  <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+                  Send Enquiry
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Contact Info Sidebar -->
+          <div class="animate-fade-up delay-200">
+
+            <!-- Quick Contact -->
+            <div class="card" style="margin-bottom:1.5rem;padding:2rem;">
+              <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:1.5rem;">Quick Contact</h3>
+
+              <a href="https://wa.me/60127953577" target="_blank" class="btn btn-whatsapp w-full btn-lg" style="margin-bottom:1rem;">
+                <span class="material-symbols-outlined" style="font-size:20px;">chat</span>
+                WhatsApp Us Directly
+              </a>
+
+              <div style="display:flex;flex-direction:column;gap:1.25rem;margin-top:1.5rem;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div class="icon-box icon-box-blue">
+                    <span class="material-symbols-outlined">mail</span>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="font-weight:600;">EMAIL</p>
+                    <p class="font-bold text-sm">theapawstrophe@gmail.com</p>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div class="icon-box icon-box-teal">
+                    <span class="material-symbols-outlined">phone</span>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="font-weight:600;">PHONE</p>
+                    <p class="font-bold text-sm">012-795 3577</p>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div class="icon-box icon-box-gold">
+                    <span class="material-symbols-outlined">location_on</span>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="font-weight:600;">LOCATION</p>
+                    <p class="font-bold text-sm">Kuala Lumpur City Centre, Malaysia</p>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:1rem;">
+                  <div class="icon-box icon-box-blue">
+                    <span class="material-symbols-outlined">schedule</span>
+                  </div>
+                  <div>
+                    <p class="text-xs text-muted" style="font-weight:600;">BUSINESS HOURS</p>
+                    <p class="font-bold text-sm">Mon–Fri, 9:00 AM – 6:00 PM (GMT+8)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scarcity -->
+            <div style="background:var(--gradient-primary);color:white;padding:2rem;border-radius:20px;margin-bottom:1.5rem;">
+              <div class="scarcity-badge" style="margin-bottom:1rem;width:fit-content;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.25);color:white;">
+                <span class="pulse" style="background:white;"></span>
+                Limited Slots
+              </div>
+              <h3 style="font-size:1.375rem;font-weight:800;margin-bottom:0.75rem;color:white;">Only 4 Clients Per Month</h3>
+              <p style="font-size:0.875rem;opacity:0.9;line-height:1.7;">We limit our intake to ensure premium quality for every project. Currently <strong>2 slots remaining</strong> this month.</p>
+            </div>
+
+            <!-- Google Maps Embed -->
+            <div class="card" style="padding:0;overflow:hidden;">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15935.753862280126!2d101.6958!3d3.1390!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc49c701efeaa7%3A0xf4d98e5b2f1c287d!2sKuala%20Lumpur%20City%20Centre!5e0!3m2!1sen!2smy!4v1700000000000!5m2!1sen!2smy"
+                width="100%"
+                height="250"
+                style="border:0;display:block;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Pawstrophe Digital Office Location"
+              ></iframe>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="nav-brand" style="margin-bottom:0.5rem;">
+            <div class="nav-brand-icon"><span class="material-symbols-outlined">rocket_launch</span></div>
+            <span class="nav-brand-text">Pawstrophe <span class="accent">Digital</span></span>
+          </a>
+          <p class="footer-brand-desc">Premium digital agency based in Kuala Lumpur, dedicated to helping Malaysian SMEs thrive in the digital age.</p>
+        </div>
+        <div><h4 class="footer-heading">Services</h4><ul class="footer-links"><li><a href="services.html">Web Design</a></li><li><a href="services.html">Multi-Page Sites</a></li><li><a href="services.html">Local SEO</a></li><li><a href="services.html">Maintenance</a></li></ul></div>
+        <div><h4 class="footer-heading">Company</h4><ul class="footer-links"><li><a href="portfolio.html">Portfolio</a></li><li><a href="faq.html">FAQ</a></li><li><a href="terms.html">Terms & Conditions</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+        <div><h4 class="footer-heading">Contact</h4><ul class="footer-links">
+          <li style="display:flex;align-items:center;gap:0.5rem;"><span class="material-symbols-outlined" style="font-size:16px;color:var(--royal-blue);">location_on</span>Kuala Lumpur, Malaysia</li>
+          <li style="display:flex;align-items:center;gap:0.5rem;"><span class="material-symbols-outlined" style="font-size:16px;color:var(--royal-blue);">mail</span>theapawstrophe@gmail.com</li>
+        </ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copyright">© 2026 Pawstrophe Digital. All rights reserved.</p>
+        <div class="footer-legal-links"><a href="terms.html">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      </div>
+    </div>
+  </footer>
+  <a href="https://wa.me/60127953577" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp"><span class="material-symbols-outlined">chat</span></a>
+  <script src="main.js"></script>
+</body>
+</html>
