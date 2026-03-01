@@ -8,9 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-royal text-white text-sm">
-                <span className="material-symbols-outlined text-lg">rocket_launch</span>
-              </div>
+              <img src="/PricePage/img/favicon.ico" alt="Pawstrophe Digital" className="h-9 w-9 object-contain" />
               <span className="font-heading text-lg font-bold tracking-tight text-slate-900 dark:text-white">
                 Pawstrophe <span className="text-royal">Digital</span>
               </span>

@@ -74,9 +74,11 @@ export default function ServicesPage() {
                 <Link href="/pricing" className="inline-flex items-center gap-2 rounded-xl bg-royal px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-royal/25 hover:bg-royal-dark transition-all">View Pricing</Link>
               </div>
             </motion.div>
-            <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="overflow-hidden rounded-2xl border border-slate-200 shadow-xl dark:border-white/[0.06]">
-              <div className="aspect-[4/3] bg-gradient-to-br from-royal/10 to-teal/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-7xl text-royal/30">web</span>
+            <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="service-preview overflow-hidden rounded-2xl border border-slate-200 shadow-xl dark:border-white/[0.06]">
+              <div className="aspect-[4/3] bg-gradient-to-br from-royal/20 via-teal/10 to-royal/5 dark:from-royal/30 dark:via-teal/15 dark:to-midnight flex flex-col items-center justify-center relative">
+                <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                <span className="material-symbols-outlined text-royal/60 dark:text-royal/80 relative" style={{ fontSize: 80 }}>web</span>
+                <p className="mt-4 text-sm font-bold text-royal/50 dark:text-royal/70 uppercase tracking-wider relative">Single Page Preview</p>
               </div>
             </motion.div>
           </div>
@@ -110,9 +112,11 @@ export default function ServicesPage() {
                 <Link href="/pricing" className="inline-flex items-center gap-2 rounded-xl bg-royal px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-royal/25 hover:bg-royal-dark transition-all">View Pricing</Link>
               </div>
             </motion.div>
-            <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="order-1 overflow-hidden rounded-2xl border border-slate-200 shadow-xl dark:border-white/[0.06]">
-              <div className="aspect-[4/3] bg-gradient-to-br from-teal/10 to-gold/10 flex items-center justify-center">
-                <span className="material-symbols-outlined text-7xl text-teal/30">devices</span>
+            <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="service-preview order-1 overflow-hidden rounded-2xl border border-slate-200 shadow-xl dark:border-white/[0.06]">
+              <div className="aspect-[4/3] bg-gradient-to-br from-teal/20 via-gold/10 to-teal/5 dark:from-teal/30 dark:via-gold/15 dark:to-midnight flex flex-col items-center justify-center relative">
+                <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                <span className="material-symbols-outlined text-teal/60 dark:text-teal/80 relative" style={{ fontSize: 80 }}>devices</span>
+                <p className="mt-4 text-sm font-bold text-teal/50 dark:text-teal/70 uppercase tracking-wider relative">Multi-Page Preview</p>
               </div>
             </motion.div>
           </div>

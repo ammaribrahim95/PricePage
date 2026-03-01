@@ -50,6 +50,20 @@ body {
   background-clip: text;
 }
 
+@media (prefers-color-scheme: dark) {
+  .gradient-text {
+    background: linear-gradient(135deg, #60A5FA, #2DD4BF);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+[data-theme="dark"] .gradient-text {
+  background: linear-gradient(135deg, #60A5FA, #2DD4BF);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 /* ===== GLASSMORPHISM CARD ===== */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
@@ -267,6 +281,28 @@ body {
 
 .process-step:last-child::before {
   display: none;
+}
+
+/* ===== SERVICE PREVIEW ===== */
+.service-preview {
+  position: relative;
+  overflow: hidden;
+}
+
+.service-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .service-preview {
+    border-color: rgba(37, 99, 235, 0.2) !important;
+  }
+  .service-preview::before {
+    background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  }
 }
 
 /* ===== SCROLLBAR ===== */

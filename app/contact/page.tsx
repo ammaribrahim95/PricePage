@@ -12,8 +12,8 @@ const fadeUp = {
   transition: { duration: 0.5 },
 };
 
-// Replace this with your actual Google Apps Script Web App URL
-const GOOGLE_SHEETS_WEBHOOK = "YOUR_GOOGLE_APPS_SCRIPT_URL";
+// Google Apps Script Web App URL
+const GOOGLE_SHEETS_WEBHOOK = "https://script.google.com/macros/s/AKfycbxN0Nje0zvbZ22fQ7wnVmtovEHivx7iT4Ikv34WmVfPSTeyuSgjI0Zr5R1VcvavNuxC/exec";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -30,18 +30,20 @@ export default function ContactPage() {
     setStatus("sending");
 
     try {
-      // Submit to Google Sheets via Apps Script webhook
-      if (GOOGLE_SHEETS_WEBHOOK !== "YOUR_GOOGLE_APPS_SCRIPT_URL") {
-        await fetch(GOOGLE_SHEETS_WEBHOOK, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...formData,
-            timestamp: new Date().toISOString(),
-          }),
-        });
-      }
+      // Build URL-encoded form data (reliable with Google Apps Script)
+      const payload = new URLSearchParams();
+      payload.append("timestamp", new Date().toISOString());
+      Object.entries(formData).forEach(([key, value]) => {
+        payload.append(key, value);
+      });
+
+      await fetch(GOOGLE_SHEETS_WEBHOOK, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: payload.toString(),
+      });
+
       setStatus("success");
       setFormData({ name: "", phone: "", email: "", business: "", service: "", budget: "", message: "" });
     } catch {
@@ -164,7 +166,8 @@ export default function ContactPage() {
                     { icon: "mail", label: "EMAIL", value: "theapawstrophe@gmail.com", color: "text-royal" },
                     { icon: "phone", label: "PHONE", value: "012-795 3577", color: "text-teal" },
                     { icon: "location_on", label: "LOCATION", value: "Kuala Lumpur, Malaysia", color: "text-gold" },
-                    { icon: "schedule", label: "BUSINESS HOURS", value: "Mon–Fri, 9AM – 6PM (GMT+8)", color: "text-royal" },
+                    { icon: "schedule", label: "BUSINESS HOURS", value: "Mon–Sun · Flexible by appointment", color: "text-royal" },
+                    { icon: "chat", label: "WHATSAPP", value: "Available 24/7 · Instant response", color: "text-[#25D366]" },
                   ].map((c, i) => (
                     <div key={i} className="flex items-center gap-4">
                       <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 ${c.color}`}>

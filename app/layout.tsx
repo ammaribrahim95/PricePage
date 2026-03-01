@@ -3,6 +3,7 @@ import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SocialFloat from "@/components/SocialFloat";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,6 +48,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
       <head>
+        <link rel="icon" href="/PricePage/img/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/PricePage/img/favicon.ico" />
+        <link rel="shortcut icon" href="/PricePage/img/favicon.ico" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -57,16 +61,8 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
 
-        {/* WhatsApp Float */}
-        <a
-          href="https://wa.me/60127953577"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="whatsapp-float"
-          aria-label="Chat on WhatsApp"
-        >
-          <span className="material-symbols-outlined">chat</span>
-        </a>
+        {/* Social Speed Dial */}
+        <SocialFloat />
       </body>
     </html>
   );
