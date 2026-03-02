@@ -28,7 +28,7 @@ export default function Navbar() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/PricePage/img/favicon.ico" alt="Pawstrophe Digital" className="h-9 w-9 object-contain" />
+            <img src="/img/favicon.ico" alt="Pawstrophe Digital" className="h-9 w-9 object-contain" />
             <span className="font-heading text-lg font-bold tracking-tight text-slate-900 dark:text-white">
               Pawstrophe <span className="text-royal">Digital</span>
             </span>

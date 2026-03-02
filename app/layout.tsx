@@ -48,9 +48,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
       <head>
-        <link rel="icon" href="/PricePage/img/favicon.ico" type="image/x-icon" />
-        <link rel="apple-touch-icon" href="/PricePage/img/favicon.ico" />
-        <link rel="shortcut icon" href="/PricePage/img/favicon.ico" />
+        <link rel="icon" href="/img/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/img/favicon.ico" />
+        <link rel="shortcut icon" href="/img/favicon.ico" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
