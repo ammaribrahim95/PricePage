@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /* ═══════════════════════════════════════════════════
    TYPES
@@ -23,13 +24,129 @@ interface LeadData {
   message: string;
 }
 
+interface ActionButton {
+  label: string;
+  href: string;
+  icon: string;
+}
+
 const GREET =
   "Hi! 👋 I'm the Pawstrophe Digital assistant. I can help you explore our website packages and pricing. What kind of website are you looking for?";
+
+const SESSION_KEY = "pawstrophe-chat-state";
+
+/* ═══════════════════════════════════════════════════
+   MESSAGE CONTENT RENDERER — clickable links
+   ═══════════════════════════════════════════════════ */
+function renderMessageContent(text: string) {
+  // Split text by URLs and render them as clickable links
+  const urlRegex = /(https?:\/\/[^\s),]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, i) => {
+    if (urlRegex.test(part)) {
+      // Reset regex lastIndex after test
+      urlRegex.lastIndex = 0;
+
+      // Determine link label
+      let label = part;
+      let icon = "open_in_new";
+      if (part.includes("wa.me") || part.includes("whatsapp")) {
+        label = "💬 WhatsApp Us";
+        icon = "chat";
+      }
+
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="chat-widget-link"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 12 }}>{icon}</span>
+          {label}
+        </a>
+      );
+    }
+    // Reset regex lastIndex for the split
+    urlRegex.lastIndex = 0;
+    return <Fragment key={i}>{part}</Fragment>;
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   ACTION BUTTONS — detect keywords → show nav buttons
+   ═══════════════════════════════════════════════════ */
+function getActionButtons(text: string): ActionButton[] {
+  const buttons: ActionButton[] = [];
+  const lower = text.toLowerCase();
+
+  // Only show buttons for assistant messages with relevant content
+  const hasPricing = /rm\s*[\d,]+|rm\s*2[,.]?500|rm\s*4[,.]?800|rm\s*280|rm\s*450|starter|growth/i.test(text);
+  const hasPackage = /(package|plan|single page|multi.?page|subscription|one.?off|maintenance)/i.test(text);
+  const hasService = /(web design|website|seo|cms|landing page|responsive)/i.test(text);
+  const hasContact = /(contact|reach out|get in touch|book|schedule|consult)/i.test(text);
+  const hasPortfolio = /(portfolio|previous work|examples|projects|showcase)/i.test(text);
+  const hasFaq = /(faq|frequently|revision|ownership|upgrade)/i.test(text);
+
+  if (hasPricing || hasPackage) {
+    buttons.push({ label: "View Pricing", href: "/pricing", icon: "payments" });
+  }
+  if (hasService && !hasPricing) {
+    buttons.push({ label: "Our Services", href: "/services", icon: "design_services" });
+  }
+  if (hasPortfolio) {
+    buttons.push({ label: "View Portfolio", href: "/portfolio", icon: "photo_library" });
+  }
+  if (hasContact && !lower.includes("whatsapp")) {
+    buttons.push({ label: "Contact Us", href: "/contact", icon: "mail" });
+  }
+  if (hasFaq) {
+    buttons.push({ label: "View FAQ", href: "/faq", icon: "help" });
+  }
+
+  // Max 2 buttons per message to avoid clutter
+  return buttons.slice(0, 2);
+}
+
+/* ═══════════════════════════════════════════════════
+   SESSION STORAGE HELPERS
+   ═══════════════════════════════════════════════════ */
+function saveState(data: {
+  messages: Message[];
+  consented: boolean;
+  open: boolean;
+  leadSubmitted: boolean;
+}) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+  } catch {
+    // sessionStorage might not be available
+  }
+}
+
+function loadState(): {
+  messages: Message[];
+  consented: boolean;
+  open: boolean;
+  leadSubmitted: boolean;
+} | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
 
 /* ═══════════════════════════════════════════════════
    CHAT WIDGET COMPONENT
    ═══════════════════════════════════════════════════ */
 export default function ChatWidget() {
+  const router = useRouter();
+
   /* ── State ── */
   const [open, setOpen] = useState(false);
   const [consented, setConsented] = useState(false);
@@ -52,6 +169,23 @@ export default function ChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  /* ── Restore session state on mount ── */
+  useEffect(() => {
+    const saved = loadState();
+    if (saved) {
+      setMessages(saved.messages);
+      setConsented(saved.consented);
+      setOpen(saved.open);
+      setLeadSubmitted(saved.leadSubmitted);
+      if (saved.consented) setConsentChecked(true);
+    }
+  }, []);
+
+  /* ── Persist state on changes ── */
+  useEffect(() => {
+    saveState({ messages, consented, open, leadSubmitted });
+  }, [messages, consented, open, leadSubmitted]);
+
   /* ── Auto-scroll on new messages ── */
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -70,6 +204,15 @@ export default function ChatWidget() {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [loading, open, consented, showLeadConsent]);
+
+  /* ═══════════════════════════════════════════════════
+     NAVIGATE WITHOUT LOSING CHAT
+     ═══════════════════════════════════════════════════ */
+  const navigateTo = (href: string) => {
+    // State is already persisted via useEffect above
+    // Use Next.js router for client-side navigation (no full page reload)
+    router.push(href);
+  };
 
   /* ═══════════════════════════════════════════════════
      SEND MESSAGE
@@ -314,21 +457,42 @@ export default function ChatWidget() {
               <>
                 {/* Messages */}
                 <div className="chat-widget-messages" ref={scrollRef}>
-                  {messages.map((msg, i) => (
-                    <div
-                      key={i}
-                      className={`chat-widget-msg ${msg.role === "user" ? "chat-widget-msg-user" : "chat-widget-msg-bot"}`}
-                    >
-                      {msg.role === "assistant" && (
-                        <div className="chat-widget-msg-avatar">
-                          <span className="material-symbols-outlined" style={{ fontSize: 14 }}>smart_toy</span>
+                  {messages.map((msg, i) => {
+                    const actionButtons = msg.role === "assistant" ? getActionButtons(msg.content) : [];
+
+                    return (
+                      <div key={i}>
+                        <div
+                          className={`chat-widget-msg ${msg.role === "user" ? "chat-widget-msg-user" : "chat-widget-msg-bot"}`}
+                        >
+                          {msg.role === "assistant" && (
+                            <div className="chat-widget-msg-avatar">
+                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>smart_toy</span>
+                            </div>
+                          )}
+                          <div className={`chat-widget-bubble ${msg.role === "user" ? "chat-widget-bubble-user" : "chat-widget-bubble-bot"}`}>
+                            {renderMessageContent(msg.content)}
+                          </div>
                         </div>
-                      )}
-                      <div className={`chat-widget-bubble ${msg.role === "user" ? "chat-widget-bubble-user" : "chat-widget-bubble-bot"}`}>
-                        {msg.content}
+
+                        {/* Action Buttons */}
+                        {actionButtons.length > 0 && (
+                          <div className="chat-widget-actions">
+                            {actionButtons.map((btn, j) => (
+                              <button
+                                key={j}
+                                onClick={() => navigateTo(btn.href)}
+                                className="chat-widget-action-btn"
+                              >
+                                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>{btn.icon}</span>
+                                {btn.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {/* Typing Indicator */}
                   {loading && (
