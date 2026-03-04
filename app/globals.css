@@ -702,3 +702,29 @@ body {
 [data-theme="dark"] .chat-widget-footer {
   background: rgba(15, 23, 42, 0.5);
 }
+
+/* Lead Consent Card */
+.chat-widget-lead-consent {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.25rem 0;
+}
+.chat-widget-lead-consent-card {
+  background: linear-gradient(135deg, var(--color-slate-50), white);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+  max-width: 88%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  .chat-widget-lead-consent-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    border-color: var(--color-slate-700);
+  }
+}
+[data-theme="dark"] .chat-widget-lead-consent-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+  border-color: var(--color-slate-700);
+}
+

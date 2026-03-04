@@ -4,15 +4,33 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
+/* ═══════════════════════════════════════════════════
+   TYPES
+   ═══════════════════════════════════════════════════ */
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const GREET =
-  "Hi! 👋 I'm the Pawstrophe Digital assistant. I can help you with our pricing, services, and get you started on your project. What would you like to know?";
+interface LeadData {
+  name: string;
+  phone: string;
+  email: string;
+  company: string;
+  package: string;
+  budget: string;
+  timeline: string;
+  message: string;
+}
 
+const GREET =
+  "Hi! 👋 I'm the Pawstrophe Digital assistant. I can help you explore our website packages and pricing. What kind of website are you looking for?";
+
+/* ═══════════════════════════════════════════════════
+   CHAT WIDGET COMPONENT
+   ═══════════════════════════════════════════════════ */
 export default function ChatWidget() {
+  /* ── State ── */
   const [open, setOpen] = useState(false);
   const [consented, setConsented] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -23,26 +41,44 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [lastSent, setLastSent] = useState(0);
+
+  // Lead capture state
+  const [leadData, setLeadData] = useState<LeadData | null>(null);
+  const [showLeadConsent, setShowLeadConsent] = useState(false);
+  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+
+  /* ── Refs ── */
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom
+  /* ── Auto-scroll on new messages ── */
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  // Focus input when chat opens
+  /* ── Focus input when chat opens ── */
   useEffect(() => {
     if (open && consented) {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [open, consented]);
 
+  /* ── Auto-focus after loading completes ── */
+  useEffect(() => {
+    if (!loading && open && consented && !showLeadConsent) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [loading, open, consented, showLeadConsent]);
+
+  /* ═══════════════════════════════════════════════════
+     SEND MESSAGE
+     ═══════════════════════════════════════════════════ */
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    // Client-side rate limit (2 seconds)
+    // Client-side rate limit: 2 seconds between messages
     if (Date.now() - lastSent < 2000) return;
     setLastSent(Date.now());
 
@@ -66,21 +102,91 @@ export default function ChatWidget() {
       });
 
       const data = await res.json();
-      const reply = data.reply || data.error || "Sorry, something went wrong. Please try again.";
+      const reply = data.reply || "Sorry, something went wrong. Please try again.";
+
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
+      // Check if lead was captured
+      if (data.leadCaptured && data.leadData && !leadSubmitted) {
+        setLeadData(data.leadData);
+        setShowLeadConsent(true);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I'm having trouble connecting. Please try again or WhatsApp us at +60127953577.",
+          content:
+            "I'm having trouble connecting. Please try again or WhatsApp us: https://wa.me/60127953577",
         },
       ]);
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, lastSent, honeypot]);
+  }, [input, loading, messages, lastSent, honeypot, leadSubmitted]);
 
+  /* ═══════════════════════════════════════════════════
+     SUBMIT LEAD
+     ═══════════════════════════════════════════════════ */
+  const submitLead = async () => {
+    if (!leadData || leadSubmitting) return;
+    setLeadSubmitting(true);
+
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setLeadSubmitted(true);
+        setShowLeadConsent(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "✅ Thank you! Your details have been submitted. Our team will contact you within 24 hours. Is there anything else I can help you with?",
+          },
+        ]);
+      } else {
+        const errorMsg = data.errors?.join(" ") || data.error || "Submission failed.";
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `⚠️ ${errorMsg}` },
+        ]);
+        setShowLeadConsent(false);
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "⚠️ Couldn't submit your details. Please WhatsApp us directly: https://wa.me/60127953577",
+        },
+      ]);
+      setShowLeadConsent(false);
+    } finally {
+      setLeadSubmitting(false);
+    }
+  };
+
+  const declineLead = () => {
+    setShowLeadConsent(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "No problem! Feel free to continue chatting. You can submit your details anytime.",
+      },
+    ]);
+  };
+
+  /* ── Keyboard Handler ── */
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -88,11 +194,15 @@ export default function ChatWidget() {
     }
   };
 
+  /* ── Consent Gate ── */
   const handleConsent = () => {
     if (!consentChecked) return;
     setConsented(true);
   };
 
+  /* ═══════════════════════════════════════════════════
+     RENDER
+     ═══════════════════════════════════════════════════ */
   return (
     <div className="chat-widget-container">
       {/* Toggle Button */}
@@ -171,7 +281,7 @@ export default function ChatWidget() {
                   <span className="material-symbols-outlined chat-widget-consent-icon">shield</span>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white">Privacy Notice</h4>
                   <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                    This chat may collect your name, email, and phone number to assist you better. Your data is
+                    This chat may collect your name, email, and phone number to assist you. Your data is
                     protected under Malaysia&apos;s PDPA 2010.
                   </p>
                   <label className="mt-4 flex cursor-pointer items-start gap-2.5">
@@ -233,6 +343,67 @@ export default function ChatWidget() {
                       </div>
                     </div>
                   )}
+
+                  {/* Lead Consent Confirmation */}
+                  {showLeadConsent && leadData && (
+                    <div className="chat-widget-lead-consent">
+                      <div className="chat-widget-lead-consent-card">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="material-symbols-outlined text-teal" style={{ fontSize: 18 }}>verified_user</span>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">Submit Your Details</p>
+                        </div>
+
+                        <div className="space-y-1.5 mb-3">
+                          {leadData.name && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                              <strong>Name:</strong> {leadData.name}
+                            </p>
+                          )}
+                          {leadData.phone && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                              <strong>Phone:</strong> {leadData.phone}
+                            </p>
+                          )}
+                          {leadData.email && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                              <strong>Email:</strong> {leadData.email}
+                            </p>
+                          )}
+                          {leadData.company && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                              <strong>Company:</strong> {leadData.company}
+                            </p>
+                          )}
+                          {leadData.package && leadData.package !== "Not specified" && (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                              <strong>Package:</strong> {leadData.package}
+                            </p>
+                          )}
+                        </div>
+
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-3">
+                          By submitting, you agree to be contacted by Pawstrophe Digital.
+                        </p>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={submitLead}
+                            disabled={leadSubmitting}
+                            className="flex-1 rounded-lg bg-teal px-3 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                          >
+                            {leadSubmitting ? "Submitting..." : "✓ Submit"}
+                          </button>
+                          <button
+                            onClick={declineLead}
+                            disabled={leadSubmitting}
+                            className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-medium text-slate-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
+                          >
+                            Not now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Honeypot (hidden from humans) */}
@@ -258,12 +429,12 @@ export default function ChatWidget() {
                     placeholder="Ask about our pricing..."
                     className="chat-widget-input"
                     maxLength={500}
-                    disabled={loading}
+                    disabled={loading || showLeadConsent}
                     id="chat-input"
                   />
                   <button
                     onClick={sendMessage}
-                    disabled={!input.trim() || loading}
+                    disabled={!input.trim() || loading || showLeadConsent}
                     className="chat-widget-send"
                     aria-label="Send message"
                     id="chat-send-btn"

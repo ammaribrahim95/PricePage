@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-/* ─── Rate Limiter (in-memory, per IP) ─── */
+/* ═══════════════════════════════════════════════════
+   RATE LIMITER — in-memory, per IP
+   ═══════════════════════════════════════════════════ */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10; // requests
+const RATE_LIMIT = 15;
 const RATE_WINDOW = 60_000; // 1 minute
+const MAX_MSG_LEN = 500;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -17,175 +20,156 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT;
 }
 
-/* ─── System Prompt with Pricing Knowledge Base ─── */
-const SYSTEM_PROMPT = `You are Pawstrophe Digital's AI assistant on their pricing website. You are friendly, professional, and concise.
+// Cleanup stale entries every 5 minutes
+if (typeof globalThis !== "undefined") {
+  const cleanup = () => {
+    const now = Date.now();
+    for (const [key, val] of rateLimitMap) {
+      if (now > val.resetAt) rateLimitMap.delete(key);
+    }
+  };
+  setInterval(cleanup, 5 * 60_000);
+}
+
+/* ═══════════════════════════════════════════════════
+   SYSTEM PROMPT — Pricing & Lead Collection
+   ═══════════════════════════════════════════════════ */
+const SYSTEM_PROMPT = `You are Pawstrophe Digital's friendly AI assistant on the company pricing page. You are professional, warm, bilingual (Malay + English), and concise.
+
+## YOUR ROLE
+- Help visitors understand Pawstrophe Digital's website packages.
+- Discuss features, benefits, and comparisons between packages.
+- Guide visitors toward the best package for their business.
+- Gradually collect lead information through natural conversation.
 
 ## STRICT RULES
-- Only answer based on the APPROVED PRICING and FAQ below.
-- Do NOT generate custom pricing, discounts, or promotions.
-- Do NOT promise features, deliverables, or timelines not listed below.
-- If a question is outside your knowledge, respond: "For more specific requirements, please contact Pawstrophe Digital directly at +60127953577 or WhatsApp us."
-- Keep responses concise (2-4 sentences unless listing pricing).
-- Use MYR (RM) currency.
+1. ONLY quote from the APPROVED PRICING below. Never invent pricing.
+2. NEVER offer discounts, promotions, or negotiated pricing.
+3. NEVER promise features, deliverables, or timelines not listed below.
+4. If a question is unrelated to web design, websites, or Pawstrophe Digital, respond:
+   "For further assistance, please contact us directly via WhatsApp: https://wa.me/60127953577"
+5. Keep responses concise (2–4 sentences max, unless listing package details).
+6. Always use MYR (RM) currency format.
+7. Be helpful but brief — you are a sales assistant, not a lecturer.
 
 ## APPROVED PRICING
 
-### One-Off Payment Packages
-1. **Starter — RM 2,500 (one-time)**
-   - Single page landing page
-   - Free 3 months support
-   - WhatsApp integration, Google Maps & Business setup
-   - Mobile responsive design, contact form
-   - Basic local SEO optimization, SSL & domain pointing
-   - Turnaround: 7–10 working days
+### 💼 One-Off Payment Packages
 
-2. **Growth — RM 4,800 (one-time)** ✦ Best Value
-   - Multi-page website (up to 5 pages: Home, About, Services, Contact, Gallery)
-   - Free 3 months support (priority)
-   - CMS-ready structure, advanced SEO optimization
-   - High performance & page speed
-   - WhatsApp & Google Maps integration + analytics
-   - Custom design (no templates)
-   - Turnaround: 15–20 working days
+**Starter Package — RM 2,500 (one-time)**
+- Single page landing page website
+- Free 3 months support included
+- WhatsApp button integration
+- Google Maps & Google Business setup
+- Mobile responsive design
+- Contact form with email notification
+- Basic local SEO optimization
+- SSL certificate & domain pointing
+- Turnaround: 7–10 working days
 
-### Subscription Packages (Minimum 12-Month Commitment)
-1. **Single Page — RM 280/month**
-   - Full single page design & development
-   - WhatsApp + Google Maps, basic SEO & mobile responsive
-   - Ongoing support included, monthly content updates
+**Growth Package — RM 4,800 (one-time)** ✦ Best Value
+- Multi-page website (up to 5 pages: Home, About, Services, Contact, Gallery)
+- Free 3 months priority support
+- CMS-ready structure for easy updates
+- Advanced SEO optimization
+- High performance & fast page speed
+- WhatsApp & Google Maps integration
+- Google Analytics setup
+- Custom design (no templates)
+- Turnaround: 15–20 working days
 
-2. **Multi-Page — RM 450/month** ✦ Best Value
-   - Up to 5 pages, CMS integration
-   - Advanced SEO & analytics, priority support
-   - Quarterly design refreshes, performance monitoring
+### 📅 Subscription Packages (Minimum 12-Month Commitment)
 
-### Maintenance Plans (Post-launch, for existing customers)
+**Single Page Support — RM 280/month**
+- Full single page design & development
+- WhatsApp + Google Maps integration
+- Basic SEO & mobile responsive design
+- Ongoing support included
+- Monthly content updates (text/images)
+
+**Multi-Page Support — RM 450/month** ✦ Best Value
+- Up to 5 pages with CMS integration
+- Advanced SEO & Google Analytics
+- Priority support with fast response
+- Quarterly design refreshes
+- Performance monitoring & reporting
+
+### 🔧 Maintenance Plans (Existing Customers Only)
 - Starter sites: RM 200/month
 - Growth sites: RM 350/month
-- Covers: monthly security patching, content updates (minor), uptime monitoring 24/7, monthly performance reports, priority bug fixes
+- Includes: monthly security patches, minor content updates, 24/7 uptime monitoring, monthly performance reports, priority bug fixes
 
-### Additional Rates
+### 📋 Additional Rates
 - Technical Man-Day Rate: RM 900 (approx. 8 working hours)
 - Emergency After-Hours Support: RM 1,350/man-day
 
-### Payment Structure
+### 💳 Payment Structure
 - 50% upfront deposit to secure project slot
 - 50% balance upon UAT approval before launch
 - Invoices payable within 7 business days
 
-### What's NOT Included (Quoted Separately)
+### ❌ Not Included (Quoted Separately)
 - Domain registration
 - Hosting services (typically RM 300–500/year via Exabytes or Shinjiru)
 - Third-party API/service costs
-- Operational costs (email hosting, CDN, SaaS subscriptions)
+- Email hosting, CDN, SaaS subscriptions
 
 ## FAQ KNOWLEDGE
-- Revisions: 2 rounds of minor revisions included per phase. Major structural changes billed at man-day rate.
+- Revisions: 2 rounds of minor revisions per phase. Major structural changes billed at man-day rate.
 - Ownership: Client owns 100% of deliverables upon full payment.
-- Upgrade: Starter can be upgraded to Growth — discounted upgrade cost based on existing work.
-- Starter uses professional design frameworks customized to brand. Growth is 100% custom designed.
-- Industries: Malaysian SMEs — clinics, workshops, retail, F&B, professional services, contractors, education.
+- Upgrade: Starter → Growth upgrade available at discounted cost based on existing work.
+- Starter uses professional frameworks customized to brand. Growth is 100% custom designed.
+- Target industries: Malaysian SMEs — clinics, workshops, retail, F&B, professional services, contractors, education centers.
 
-## LEAD COLLECTION
-When the conversation feels natural, try to collect the following information (DO NOT ask all at once, gather progressively):
-- Full Name
-- Company Name
-- Mobile Number
-- Email
-- Project Type (Single Page / Multi-Page / Subscription / Not Sure)
-- Budget Range
-- Timeline
+## LEAD COLLECTION INSTRUCTIONS
+Your secondary goal is collecting lead information. Do this GRADUALLY and NATURALLY in conversation:
 
-When you have collected at least Name + Email OR Name + Phone, include this EXACT marker in your response (hidden from user display):
+Required fields (collect in order of opportunity):
+1. Full Name
+2. Phone Number (Malaysian format: 01X-XXXXXXX)
+3. Email Address
+4. Company Name
+5. Which Package they are interested in
+6. Budget Range
+7. Project Timeline
+8. Any specific project message or requirements
+
+RULES for collection:
+- Do NOT ask for all fields at once — that's pushy.
+- Weave questions naturally: "By the way, may I know your name so I can assist you better?"
+- If they mention their company, ask about their website needs.
+- If they show interest in a package, ask about their timeline.
+- Validate politely: if a phone number looks wrong, ask them to double-check.
+
+When you have collected at MINIMUM: Name + Phone OR Name + Email, include this EXACT block in your response:
+
 [LEAD_CAPTURED]
-name: <name>
-company: <company or "Not provided">
-phone: <phone or "Not provided">
+name: <full name>
+phone: <phone number or "Not provided">
 email: <email or "Not provided">
-project: <project type or "Not specified">
-budget: <budget or "Not specified">
+company: <company name or "Not provided">
+package: <selected package or "Not specified">
+budget: <budget range or "Not specified">
 timeline: <timeline or "Not specified">
+message: <project notes or "Not specified">
 [/LEAD_CAPTURED]
 
-Continue the conversation naturally after the marker.`;
+IMPORTANT: Continue the conversation naturally AFTER this block. The user will NOT see the block.`;
 
-/* ─── Sanitize Input ─── */
-function sanitize(input: string): string {
-  return input
-    .replace(/<[^>]*>/g, "") // strip HTML tags
-    .replace(/[<>]/g, "")    // strip remaining angle brackets
+/* ═══════════════════════════════════════════════════
+   SANITIZE INPUT
+   ═══════════════════════════════════════════════════ */
+function sanitize(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, "")
+    .replace(/[<>]/g, "")
     .trim()
-    .slice(0, 500);          // max 500 characters
+    .slice(0, MAX_MSG_LEN);
 }
 
-/* ─── Google Sheets Append ─── */
-async function appendToSheet(lead: Record<string, string>) {
-  const webhookUrl = process.env.CHATBOT_SHEETS_WEBHOOK;
-  if (!webhookUrl) {
-    console.warn("[Chat] CHATBOT_SHEETS_WEBHOOK not configured — skipping Sheets append");
-    return;
-  }
-
-  try {
-    const payload = new URLSearchParams();
-    payload.append("timestamp", new Date().toISOString());
-    payload.append("name", lead.name || "");
-    payload.append("company", lead.company || "");
-    payload.append("phone", lead.phone || "");
-    payload.append("email", lead.email || "");
-    payload.append("project", lead.project || "");
-    payload.append("budget", lead.budget || "");
-    payload.append("timeline", lead.timeline || "");
-    payload.append("source", "chatbot");
-
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: payload.toString(),
-    });
-    console.log("[Chat] Lead appended to Google Sheets");
-  } catch (err) {
-    console.error("[Chat] Sheets append failed:", err);
-  }
-}
-
-/* ─── Telegram Notification ─── */
-async function sendTelegramNotification(lead: Record<string, string>) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!botToken || !chatId) {
-    console.warn("[Chat] Telegram credentials not configured — skipping notification");
-    return;
-  }
-
-  const message = `🔥 *New Lead from PricePage Chatbot*
-
-👤 *Name:* ${lead.name || "—"}
-🏢 *Company:* ${lead.company || "—"}
-📱 *Phone:* ${lead.phone || "—"}
-📧 *Email:* ${lead.email || "—"}
-📋 *Project:* ${lead.project || "—"}
-💰 *Budget:* ${lead.budget || "—"}
-⏰ *Timeline:* ${lead.timeline || "—"}
-📅 *Date:* ${new Date().toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}`;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "Markdown",
-      }),
-    });
-    console.log("[Chat] Telegram notification sent");
-  } catch (err) {
-    console.error("[Chat] Telegram notification failed:", err);
-  }
-}
-
-/* ─── Parse Lead Data from Gemini Response ─── */
+/* ═══════════════════════════════════════════════════
+   EXTRACT LEAD DATA FROM GEMINI RESPONSE
+   ═══════════════════════════════════════════════════ */
 function extractLead(text: string): Record<string, string> | null {
   const match = text.match(/\[LEAD_CAPTURED\]([\s\S]*?)\[\/LEAD_CAPTURED\]/);
   if (!match) return null;
@@ -195,33 +179,41 @@ function extractLead(text: string): Record<string, string> | null {
   for (const line of lines) {
     const colonIdx = line.indexOf(":");
     if (colonIdx > 0) {
-      const key = line.slice(0, colonIdx).trim();
+      const key = line.slice(0, colonIdx).trim().toLowerCase();
       const value = line.slice(colonIdx + 1).trim();
-      lead[key] = value;
+      if (value && value !== "Not provided" && value !== "Not specified") {
+        lead[key] = value;
+      }
     }
   }
+
+  // Must have at minimum: name + (phone or email)
+  if (!lead.name) return null;
+  if (!lead.phone && !lead.email) return null;
+
   return lead;
 }
 
-/* ─── Strip Lead Marker from User-Visible Response ─── */
+/* ═══════════════════════════════════════════════════
+   CLEAN RESPONSE — strip lead marker from user view
+   ═══════════════════════════════════════════════════ */
 function cleanResponse(text: string): string {
   return text.replace(/\[LEAD_CAPTURED\][\s\S]*?\[\/LEAD_CAPTURED\]/g, "").trim();
 }
 
-/* ─── Main POST Handler ─── */
+/* ═══════════════════════════════════════════════════
+   POST /api/chat
+   ═══════════════════════════════════════════════════ */
 export async function POST(request: NextRequest) {
-  // ── Origin Validation ──
-  const origin = request.headers.get("origin") || "";
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",");
-  if (!allowedOrigins.some((o) => origin.startsWith(o.trim()))) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   // ── Rate Limiting ──
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+
   if (isRateLimited(ip)) {
     return NextResponse.json(
-      { error: "Too many requests. Please wait a moment." },
+      { reply: "You're sending messages too quickly. Please wait a moment and try again." },
       { status: 429 }
     );
   }
@@ -231,34 +223,43 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ reply: "Invalid request." }, { status: 400 });
   }
 
-  // ── Honeypot Check ──
+  // ── Honeypot (bot trap) ──
   if (body.honeypot) {
-    // Bot detected — return fake success
-    return NextResponse.json({ reply: "Thank you for your message! We'll get back to you soon." });
+    return NextResponse.json({ reply: "Thank you for your message!" });
   }
 
   // ── Validate Messages ──
   const messages = body.messages;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: "Messages required" }, { status: 400 });
+    return NextResponse.json({ reply: "Please type a message." }, { status: 400 });
   }
 
-  // ── Sanitize Messages ──
+  // ── Message Length Check ──
+  const latest = messages[messages.length - 1];
+  if (!latest?.content || typeof latest.content !== "string") {
+    return NextResponse.json({ reply: "Invalid message format." }, { status: 400 });
+  }
+  if (latest.content.length > MAX_MSG_LEN) {
+    return NextResponse.json({
+      reply: `Message too long. Please keep it under ${MAX_MSG_LEN} characters.`,
+    });
+  }
+
+  // ── Sanitize ──
   const sanitizedMessages = messages.map((m) => ({
-    role: m.role === "user" ? "user" : "model",
+    role: m.role === "user" ? ("user" as const) : ("model" as const),
     parts: [{ text: sanitize(m.content) }],
   }));
 
-  // ── Gemini API Call ──
+  // ── Gemini API ──
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "Chatbot is temporarily unavailable. Please contact us at +60127953577." },
-      { status: 503 }
-    );
+    return NextResponse.json({
+      reply: "Our chatbot is temporarily offline. Please contact us via WhatsApp: https://wa.me/60127953577",
+    });
   }
 
   try {
@@ -268,59 +269,38 @@ export async function POST(request: NextRequest) {
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    // ── Build Gemini-compatible history ──
-    // Gemini requires history to start with 'user' role.
-    // Strip any leading 'model' messages (e.g., the initial greeting).
+    // Gemini requires history to start with 'user' role
     const historyMessages = sanitizedMessages.slice(0, -1);
     const firstUserIdx = historyMessages.findIndex((m) => m.role === "user");
     const geminiHistory = firstUserIdx >= 0 ? historyMessages.slice(firstUserIdx) : [];
 
-    const chat = model.startChat({
-      history: geminiHistory,
-    });
-
-    const lastMessage = sanitizedMessages[sanitizedMessages.length - 1];
-    const result = await chat.sendMessage(lastMessage.parts[0].text);
+    const chat = model.startChat({ history: geminiHistory });
+    const lastMsg = sanitizedMessages[sanitizedMessages.length - 1];
+    const result = await chat.sendMessage(lastMsg.parts[0].text);
     const rawReply = result.response.text();
 
     // ── Lead Detection ──
-    const lead = extractLead(rawReply);
-    if (lead) {
-      // Fire-and-forget: append to Sheets + Telegram
-      appendToSheet(lead);
-      sendTelegramNotification(lead);
+    const leadData = extractLead(rawReply);
+    const displayReply = cleanResponse(rawReply);
+
+    return NextResponse.json({
+      reply: displayReply,
+      leadCaptured: !!leadData,
+      leadData: leadData || undefined,
+    });
+  } catch (err) {
+    console.error("[Chat] Gemini error:", err);
+
+    // Check for quota errors
+    const errorMsg = err instanceof Error ? err.message : "";
+    if (errorMsg.includes("429") || errorMsg.includes("quota")) {
+      return NextResponse.json({
+        reply: "I'm currently experiencing high demand. Please try again in a minute, or contact us via WhatsApp: https://wa.me/60127953577",
+      });
     }
 
-    const cleanReply = cleanResponse(rawReply);
-
-    return NextResponse.json(
-      { reply: cleanReply, leadCaptured: !!lead },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": origin,
-          "Access-Control-Allow-Methods": "POST",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-      }
-    );
-  } catch (err) {
-    console.error("[Chat] Gemini API error:", err);
-    return NextResponse.json(
-      { error: "I'm having trouble responding right now. Please try again or contact us at +60127953577." },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      reply: "I'm having trouble responding right now. Please try again or WhatsApp us: https://wa.me/60127953577",
+    });
   }
-}
-
-/* ─── OPTIONS Handler (CORS Preflight) ─── */
-export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get("origin") || "";
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "POST",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
 }
