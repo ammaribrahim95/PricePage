@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SocialFloat from "@/components/SocialFloat";
+import ChatWidget from "@/components/ChatWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +64,9 @@ export default function RootLayout({
 
         {/* Social Speed Dial */}
         <SocialFloat />
+
+        {/* AI Chat Widget */}
+        <ChatWidget />
       </body>
     </html>
   );
