@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-3.1-flash-lite",
+      model: "gemini-3.1-flash-lite-preview",
       systemInstruction: SYSTEM_PROMPT,
     });
 
@@ -289,13 +289,24 @@ export async function POST(request: NextRequest) {
       leadData: leadData || undefined,
     });
   } catch (err) {
-    console.error("[Chat] Gemini error:", err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error("[Chat] Gemini error:", errorMsg);
+    if (err instanceof Error && err.stack) {
+      console.error("[Chat] Stack:", err.stack);
+    }
 
     // Check for quota errors
-    const errorMsg = err instanceof Error ? err.message : "";
-    if (errorMsg.includes("429") || errorMsg.includes("quota")) {
+    if (errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
       return NextResponse.json({
         reply: "I'm currently experiencing high demand. Please try again in a minute, or contact us via WhatsApp: https://wa.me/60127953577",
+      });
+    }
+
+    // Check for model not found
+    if (errorMsg.includes("404") || errorMsg.includes("not found") || errorMsg.includes("NOT_FOUND")) {
+      console.error("[Chat] Model not found. Check the model name in route.ts");
+      return NextResponse.json({
+        reply: "Our chatbot is being updated. Please contact us via WhatsApp: https://wa.me/60127953577",
       });
     }
 
