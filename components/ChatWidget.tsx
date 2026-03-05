@@ -48,13 +48,10 @@ function renderMessageContent(text: string) {
       // Reset regex lastIndex after test
       urlRegex.lastIndex = 0;
 
-      // Determine link label
-      let label = part;
-      let icon = "open_in_new";
-      if (part.includes("wa.me") || part.includes("whatsapp")) {
-        label = "💬 WhatsApp Us";
-        icon = "chat";
-      }
+      // Determine link label and icon
+      const isWhatsApp = part.includes("wa.me") || part.includes("whatsapp");
+      const label = isWhatsApp ? "WhatsApp Us" : part;
+      const icon = isWhatsApp ? "chat" : "open_in_new";
 
       return (
         <a
