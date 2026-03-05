@@ -65,9 +65,9 @@ function sanitize(str: string): string {
 }
 
 function validateMalaysiaPhone(phone: string): boolean {
-  // Accepts: 01X-XXXXXXX, 01XXXXXXXXX, +601XXXXXXXXX, 601XXXXXXXXX
-  const cleaned = phone.replace(/[\s\-()]/g, "");
-  return /^(\+?60)?1\d{8,9}$/.test(cleaned);
+  // Accept any phone number with at least 9 digits (lenient — data collection matters more than strict format)
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 9 && digits.length <= 15;
 }
 
 function validateEmail(email: string): boolean {
