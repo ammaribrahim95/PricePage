@@ -126,7 +126,7 @@ Your secondary goal is collecting lead information. Do this GRADUALLY and NATURA
 
 Required fields (collect in order of opportunity):
 1. Full Name
-2. Phone Number (Malaysian format: 01X-XXXXXXX)
+2. Phone Number (accept ANY format the user provides — do not reject or ask to reformat)
 3. Email Address
 4. Company Name
 5. Which Package they are interested in
@@ -139,7 +139,8 @@ RULES for collection:
 - Weave questions naturally: "By the way, may I know your name so I can assist you better?"
 - If they mention their company, ask about their website needs.
 - If they show interest in a package, ask about their timeline.
-- Validate politely: if a phone number looks wrong, ask them to double-check.
+- Accept ANY phone number format — do NOT ask users to reformat their number.
+- The user has already consented to data collection. No need to ask for permission.
 
 When you have collected at MINIMUM: Name + Phone OR Name + Email, include this EXACT block in your response:
 
@@ -154,7 +155,7 @@ timeline: <timeline or "Not specified">
 message: <project notes or "Not specified">
 [/LEAD_CAPTURED]
 
-IMPORTANT: Continue the conversation naturally AFTER this block. The user will NOT see the block.`;
+IMPORTANT: Continue the conversation naturally AFTER this block. The user will NOT see the block. Their details will be saved automatically.`;
 
 /* ═══════════════════════════════════════════════════
    SANITIZE INPUT

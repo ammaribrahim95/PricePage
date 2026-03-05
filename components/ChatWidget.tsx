@@ -13,17 +13,6 @@ interface Message {
   content: string;
 }
 
-interface LeadData {
-  name: string;
-  phone: string;
-  email: string;
-  company: string;
-  package: string;
-  budget: string;
-  timeline: string;
-  message: string;
-}
-
 interface ActionButton {
   label: string;
   href: string;
@@ -157,9 +146,6 @@ export default function ChatWidget() {
   const [lastSent, setLastSent] = useState(0);
 
   // Lead capture state
-  const [leadData, setLeadData] = useState<LeadData | null>(null);
-  const [showLeadConsent, setShowLeadConsent] = useState(false);
-  const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
 
   /* ── Refs ── */
@@ -197,10 +183,10 @@ export default function ChatWidget() {
 
   /* ── Auto-focus after loading completes ── */
   useEffect(() => {
-    if (!loading && open && consented && !showLeadConsent) {
+    if (!loading && open && consented) {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
-  }, [loading, open, consented, showLeadConsent]);
+  }, [loading, open, consented]);
 
   /* ═══════════════════════════════════════════════════
      NAVIGATE WITHOUT LOSING CHAT
@@ -246,10 +232,9 @@ export default function ChatWidget() {
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-      // Check if lead was captured
+      // Auto-submit lead silently (user already consented to PDPA at chat start)
       if (data.leadCaptured && data.leadData && !leadSubmitted) {
-        setLeadData(data.leadData);
-        setShowLeadConsent(true);
+        autoSubmitLead(data.leadData);
       }
     } catch {
       setMessages((prev) => [
@@ -266,64 +251,27 @@ export default function ChatWidget() {
   }, [input, loading, messages, lastSent, honeypot, leadSubmitted]);
 
   /* ═══════════════════════════════════════════════════
-     SUBMIT LEAD
+     AUTO-SUBMIT LEAD (silent, no UI confirmation needed)
      ═══════════════════════════════════════════════════ */
-  const submitLead = async () => {
-    if (!leadData || leadSubmitting) return;
-    setLeadSubmitting(true);
-
+  const autoSubmitLead = async (data: Record<string, string>) => {
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(leadData),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const result = await res.json();
 
-      if (data.success) {
+      if (result.success) {
         setLeadSubmitted(true);
-        setShowLeadConsent(false);
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "✅ Thank you! Your details have been submitted. Our team will contact you within 24 hours. Is there anything else I can help you with?",
-          },
-        ]);
+        console.log("[Chat] ✅ Lead auto-submitted successfully");
       } else {
-        const errorMsg = data.errors?.join(" ") || data.error || "Submission failed.";
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: `⚠️ ${errorMsg}` },
-        ]);
-        setShowLeadConsent(false);
+        console.warn("[Chat] Lead submission returned errors:", result.errors || result.error);
       }
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "⚠️ Couldn't submit your details. Please WhatsApp us directly: https://wa.me/60127953577",
-        },
-      ]);
-      setShowLeadConsent(false);
-    } finally {
-      setLeadSubmitting(false);
+    } catch (err) {
+      console.error("[Chat] Lead auto-submit failed:", err);
     }
-  };
-
-  const declineLead = () => {
-    setShowLeadConsent(false);
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: "No problem! Feel free to continue chatting. You can submit your details anytime.",
-      },
-    ]);
   };
 
   /* ── Keyboard Handler ── */
@@ -505,66 +453,7 @@ export default function ChatWidget() {
                     </div>
                   )}
 
-                  {/* Lead Consent Confirmation */}
-                  {showLeadConsent && leadData && (
-                    <div className="chat-widget-lead-consent">
-                      <div className="chat-widget-lead-consent-card">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="material-symbols-outlined text-teal" style={{ fontSize: 18 }}>verified_user</span>
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">Submit Your Details</p>
-                        </div>
 
-                        <div className="space-y-1.5 mb-3">
-                          {leadData.name && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              <strong>Name:</strong> {leadData.name}
-                            </p>
-                          )}
-                          {leadData.phone && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              <strong>Phone:</strong> {leadData.phone}
-                            </p>
-                          )}
-                          {leadData.email && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              <strong>Email:</strong> {leadData.email}
-                            </p>
-                          )}
-                          {leadData.company && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              <strong>Company:</strong> {leadData.company}
-                            </p>
-                          )}
-                          {leadData.package && leadData.package !== "Not specified" && (
-                            <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                              <strong>Package:</strong> {leadData.package}
-                            </p>
-                          )}
-                        </div>
-
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-3">
-                          By submitting, you agree to be contacted by Pawstrophe Digital.
-                        </p>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={submitLead}
-                            disabled={leadSubmitting}
-                            className="flex-1 rounded-lg bg-teal px-3 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                          >
-                            {leadSubmitting ? "Submitting..." : "✓ Submit"}
-                          </button>
-                          <button
-                            onClick={declineLead}
-                            disabled={leadSubmitting}
-                            className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-medium text-slate-500 transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
-                          >
-                            Not now
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Honeypot (hidden from humans) */}
@@ -590,12 +479,12 @@ export default function ChatWidget() {
                     placeholder="Ask about our pricing..."
                     className="chat-widget-input"
                     maxLength={500}
-                    disabled={loading || showLeadConsent}
+                    disabled={loading}
                     id="chat-input"
                   />
                   <button
                     onClick={sendMessage}
-                    disabled={!input.trim() || loading || showLeadConsent}
+                    disabled={!input.trim() || loading}
                     className="chat-widget-send"
                     aria-label="Send message"
                     id="chat-send-btn"
