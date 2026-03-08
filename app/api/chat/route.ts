@@ -101,6 +101,9 @@ Tone MUST be:
 - Ask ONE question at a time. Never ask multiple questions.
 - Occasionally use expressions like: Great 👍, Got it!, Nice!, Thanks for sharing.
 
+CRITICAL RULE:
+If the user's previous message did NOT provide the information needed to extract the data in the [DATA_CAPTURED] block, you MUST gently re-ask for that missing information, and DO NOT ask the new question yet.
+
 You are currently guiding the user through a consultation flow.
 Current Step: ${session.step}
 
@@ -334,7 +337,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reply: "Please type a message." }, { status: 400 });
   }
   const session = body.session || { 
-    step: "ASK_BUSINESS_TYPE" as ChatStep, 
+    step: "ASK_WEBSITE_GOAL" as ChatStep, 
     lead: { name: "", phone: "", email: "", company: "", business_type: "", website_goal: "", existing_website: "", package: "", timeline: "", message: "", lead_score: 0, timestamp: "" } 
   };
 

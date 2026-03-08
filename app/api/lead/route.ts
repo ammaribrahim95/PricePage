@@ -143,6 +143,7 @@ async function sendTelegramNotification(lead: LeadData): Promise<boolean> {
     isHotLead ? "🔥 *HOT LEAD*" : "🚨 *New Website Lead*",
     "",
     `👤 *Name:* ${lead.name}`,
+    `📱 *Phone:* ${lead.phone || "—"}`,
     `📧 *Email:* ${lead.email || "—"}`,
     `🏢 *Company:* ${lead.company || "—"}`,
     `🏭 *Business:* ${lead.business_type || "—"}`,

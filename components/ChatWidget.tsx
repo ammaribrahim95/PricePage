@@ -184,7 +184,7 @@ export default function ChatWidget() {
   // Lead capture state
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const [chatSession, setChatSession] = useState<ChatSession>({
-    step: "ASK_BUSINESS_TYPE",
+    step: "ASK_WEBSITE_GOAL",
     lead: {
       name: "",
       phone: "",
