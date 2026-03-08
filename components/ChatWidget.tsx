@@ -13,6 +13,40 @@ interface Message {
   content: string;
 }
 
+export type ChatStep =
+  | "GREETING"
+  | "ASK_BUSINESS_TYPE"
+  | "ASK_WEBSITE_GOAL"
+  | "ASK_EXISTING_WEBSITE"
+  | "ASK_PACKAGE"
+  | "ASK_TIMELINE"
+  | "ASK_NAME"
+  | "ASK_PHONE"
+  | "ASK_EMAIL"
+  | "ASK_COMPANY"
+  | "ASK_MESSAGE"
+  | "GENERATE_RECOMMENDATION"
+  | "COMPLETE";
+
+export interface ChatSession {
+  step: ChatStep;
+  lead: {
+    name: string;
+    phone: string;
+    email: string;
+    company: string;
+    business_type: string;
+    website_goal: string;
+    existing_website: string;
+    package: string;
+    timeline: string;
+    message: string;
+    lead_score: number;
+    timestamp: string;
+    source?: string;
+  };
+}
+
 interface ActionButton {
   label: string;
   href: string;
@@ -20,7 +54,7 @@ interface ActionButton {
 }
 
 const GREET =
-  "Hi! 👋 I'm the Pawstrophe Digital assistant. I can help you explore our website packages and pricing. What kind of website are you looking for?";
+  "Hello 👋\nWelcome to Pawstrophe Digital.\n\nI can help you plan the right website for your business.\nIt only takes about 1 minute.\n\nFirst, what kind of business do you run?\nExamples:\nRestaurant\nClinic\nConstruction\nOnline store\nOthers";
 
 const SESSION_KEY = "pawstrophe-chat-state";
 
@@ -104,6 +138,7 @@ function saveState(data: {
   consented: boolean;
   open: boolean;
   leadSubmitted: boolean;
+  session: ChatSession;
 }) {
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
@@ -117,6 +152,7 @@ function loadState(): {
   consented: boolean;
   open: boolean;
   leadSubmitted: boolean;
+  session: ChatSession;
 } | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
@@ -147,6 +183,24 @@ export default function ChatWidget() {
 
   // Lead capture state
   const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [chatSession, setChatSession] = useState<ChatSession>({
+    step: "ASK_BUSINESS_TYPE",
+    lead: {
+      name: "",
+      phone: "",
+      email: "",
+      company: "",
+      business_type: "",
+      website_goal: "",
+      existing_website: "",
+      package: "",
+      timeline: "",
+      message: "",
+      lead_score: 0,
+      timestamp: "",
+      source: "website_chatbot"
+    }
+  });
 
   /* ── Refs ── */
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -160,14 +214,15 @@ export default function ChatWidget() {
       setConsented(saved.consented);
       setOpen(saved.open);
       setLeadSubmitted(saved.leadSubmitted);
+      if (saved.session) setChatSession(saved.session);
       if (saved.consented) setConsentChecked(true);
     }
   }, []);
 
   /* ── Persist state on changes ── */
   useEffect(() => {
-    saveState({ messages, consented, open, leadSubmitted });
-  }, [messages, consented, open, leadSubmitted]);
+    saveState({ messages, consented, open, leadSubmitted, session: chatSession });
+  }, [messages, consented, open, leadSubmitted, chatSession]);
 
   /* ── Auto-scroll on new messages ── */
   useEffect(() => {
@@ -223,6 +278,7 @@ export default function ChatWidget() {
             role: m.role === "assistant" ? "model" : "user",
             content: m.content,
           })),
+          session: chatSession,
           honeypot,
         }),
       });
@@ -232,10 +288,17 @@ export default function ChatWidget() {
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
-      // Auto-submit lead silently (user already consented to PDPA at chat start)
-      if (data.leadCaptured && data.leadData && !leadSubmitted) {
-        autoSubmitLead(data.leadData);
+      if (data.session) {
+        setChatSession(data.session);
+
+        // Auto-submit lead silently when COMPLETE state is reached
+        if (data.session.step === "COMPLETE" && !leadSubmitted) {
+          autoSubmitLead(data.session.lead);
+        }
       }
+
+      // Re-focus input immediately after bot responds
+      setTimeout(() => inputRef.current?.focus(), 100);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -248,7 +311,7 @@ export default function ChatWidget() {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, lastSent, honeypot, leadSubmitted]);
+  }, [input, loading, messages, lastSent, honeypot, leadSubmitted, chatSession]);
 
   /* ═══════════════════════════════════════════════════
      AUTO-SUBMIT LEAD (silent, no UI confirmation needed)

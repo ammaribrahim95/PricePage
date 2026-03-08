@@ -8,10 +8,14 @@ interface LeadData {
   phone: string;
   email: string;
   company: string;
+  business_type: string;
+  website_goal: string;
+  existing_website: string;
   package: string;
-  budget: string;
   timeline: string;
   message: string;
+  lead_score: number;
+  source: string;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -61,28 +65,9 @@ function isDuplicate(email: string, phone: string): boolean {
    VALIDATION
    ═══════════════════════════════════════════════════ */
 function sanitize(str: string): string {
+  if (typeof str !== "string") return "";
   return str.replace(/<[^>]*>/g, "").replace(/[<>]/g, "").trim();
 }
-
-function validateMalaysiaPhone(phone: string): boolean {
-  // Accept any phone number with at least 9 digits (lenient — data collection matters more than strict format)
-  const digits = phone.replace(/\D/g, "");
-  return digits.length >= 9 && digits.length <= 15;
-}
-
-function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-const VALID_PACKAGES = [
-  "Starter",
-  "Growth",
-  "Single Page Support",
-  "Multi-Page Support",
-  "Maintenance",
-  "Not specified",
-  "Not sure",
-];
 
 function validateLead(data: Partial<LeadData>): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -92,12 +77,6 @@ function validateLead(data: Partial<LeadData>): { valid: boolean; errors: string
   }
   if (!data.phone && !data.email) {
     errors.push("Either phone number or email is required.");
-  }
-  if (data.phone && !validateMalaysiaPhone(data.phone)) {
-    errors.push("Please provide a valid Malaysian phone number (e.g., 012-3456789).");
-  }
-  if (data.email && !validateEmail(data.email)) {
-    errors.push("Please provide a valid email address.");
   }
 
   return { valid: errors.length === 0, errors };
@@ -120,12 +99,14 @@ async function appendToSheet(lead: LeadData): Promise<boolean> {
     payload.append("phone", lead.phone || "");
     payload.append("email", lead.email || "");
     payload.append("company", lead.company || "");
+    payload.append("business_type", lead.business_type || "");
+    payload.append("website_goal", lead.website_goal || "");
+    payload.append("existing_website", lead.existing_website || "");
     payload.append("package", lead.package || "Not specified");
-    payload.append("budget", lead.budget || "Not specified");
     payload.append("timeline", lead.timeline || "Not specified");
     payload.append("message", lead.message || "");
-    payload.append("source", "PricePage AI");
-    payload.append("status", "NEW");
+    payload.append("lead_score", lead.lead_score.toString());
+    payload.append("source", lead.source || "website_chatbot");
 
     const res = await fetch(webhookUrl, {
       method: "POST",
@@ -156,22 +137,24 @@ async function sendTelegramNotification(lead: LeadData): Promise<boolean> {
     return false;
   }
 
-  const timestamp = new Date().toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" });
+  const isHotLead = lead.lead_score > 8;
+
   const text = [
-    "🔥 *New Lead — PricePage AI Chatbot*",
+    isHotLead ? "🔥 *HOT LEAD*" : "🚨 *New Website Lead*",
     "",
     `👤 *Name:* ${lead.name}`,
-    `📱 *Phone:* ${lead.phone || "—"}`,
     `📧 *Email:* ${lead.email || "—"}`,
     `🏢 *Company:* ${lead.company || "—"}`,
+    `🏭 *Business:* ${lead.business_type || "—"}`,
+    `🎯 *Goal:* ${lead.website_goal || "—"}`,
+    `🌐 *Existing Site:* ${lead.existing_website || "—"}`,
     `📦 *Package:* ${lead.package || "—"}`,
-    `💰 *Budget:* ${lead.budget || "—"}`,
     `⏰ *Timeline:* ${lead.timeline || "—"}`,
-    `💬 *Message:* ${lead.message || "—"}`,
     "",
-    `📅 *Date:* ${timestamp}`,
-    `🔹 *Source:* PricePage AI`,
-    `🔹 *Status:* NEW`,
+    `⭐ *Lead Score:* ${lead.lead_score}`,
+    "",
+    `💬 *Message:*`,
+    `${lead.message || "—"}`,
   ].join("\n");
 
   try {
@@ -232,10 +215,14 @@ export async function POST(request: NextRequest) {
     phone: sanitize(data.phone || ""),
     email: sanitize(data.email || "").toLowerCase(),
     company: sanitize(data.company || ""),
+    business_type: sanitize(data.business_type || ""),
+    website_goal: sanitize(data.website_goal || ""),
+    existing_website: sanitize(data.existing_website || ""),
     package: sanitize(data.package || "Not specified"),
-    budget: sanitize(data.budget || "Not specified"),
     timeline: sanitize(data.timeline || "Not specified"),
     message: sanitize(data.message || "").slice(0, 1000),
+    lead_score: typeof data.lead_score === "number" ? data.lead_score : 0,
+    source: sanitize(data.source || "website_chatbot")
   };
 
   // ── Validate ──

@@ -32,130 +32,227 @@ if (typeof globalThis !== "undefined") {
 }
 
 /* ═══════════════════════════════════════════════════
-   SYSTEM PROMPT — Pricing & Lead Collection
+   STATE MACHINE DEFINITIONS
    ═══════════════════════════════════════════════════ */
-const SYSTEM_PROMPT = `You are Pawstrophe Digital's friendly AI assistant on the company pricing page. You are professional, warm, bilingual (Malay + English), and concise.
+export type ChatStep =
+  | "GREETING"
+  | "ASK_BUSINESS_TYPE"
+  | "ASK_WEBSITE_GOAL"
+  | "ASK_EXISTING_WEBSITE"
+  | "ASK_PACKAGE"
+  | "ASK_TIMELINE"
+  | "ASK_NAME"
+  | "ASK_PHONE"
+  | "ASK_EMAIL"
+  | "ASK_COMPANY"
+  | "ASK_MESSAGE"
+  | "GENERATE_RECOMMENDATION"
+  | "COMPLETE";
 
-## YOUR ROLE
-- Help visitors understand Pawstrophe Digital's website packages.
-- Discuss features, benefits, and comparisons between packages.
-- Guide visitors toward the best package for their business.
-- Gradually collect lead information through natural conversation.
+export interface ChatSession {
+  step: ChatStep;
+  lead: {
+    name: string;
+    phone: string;
+    email: string;
+    company: string;
+    business_type: string;
+    website_goal: string;
+    existing_website: string;
+    package: string;
+    timeline: string;
+    message: string;
+    lead_score: number;
+    timestamp: string;
+  };
+}
 
-## STRICT RULES
-1. ONLY quote from the APPROVED PRICING below. Never invent pricing.
-2. NEVER offer discounts, promotions, or negotiated pricing.
-3. NEVER promise features, deliverables, or timelines not listed below.
-4. If a question is unrelated to web design, websites, or Pawstrophe Digital, respond:
-   "For further assistance, please contact us directly via WhatsApp: https://wa.me/60127953577"
-5. Keep responses concise (2–4 sentences max, unless listing package details).
-6. Always use MYR (RM) currency format.
-7. Be helpful but brief — you are a sales assistant, not a lecturer.
+const STEP_ORDER: ChatStep[] = [
+  "GREETING",
+  "ASK_BUSINESS_TYPE",
+  "ASK_WEBSITE_GOAL",
+  "ASK_EXISTING_WEBSITE",
+  "ASK_PACKAGE",
+  "ASK_TIMELINE",
+  "ASK_NAME",
+  "ASK_PHONE",
+  "ASK_EMAIL",
+  "ASK_COMPANY",
+  "ASK_MESSAGE",
+  "GENERATE_RECOMMENDATION",
+  "COMPLETE"
+];
 
-## APPROVED PRICING
+function getNextStep(current: ChatStep): ChatStep {
+  const idx = STEP_ORDER.indexOf(current);
+  if (idx === -1 || idx === STEP_ORDER.length - 1) return "COMPLETE";
+  return STEP_ORDER[idx + 1];
+}
 
-### 💼 One-Off Payment Packages
+/* ═══════════════════════════════════════════════════
+   DYNAMIC SYSTEM PROMPT
+   ═══════════════════════════════════════════════════ */
+function generateSystemPrompt(session: ChatSession): string {
+  const basePrompt = `You are a friendly, professional consultant for Pawstrophe Digital, helping visitors plan the right website.
+Tone MUST be:
+- Friendly, professional, natural, helpful.
+- NOT robotic. Like a consultant chatting on WhatsApp.
+- Short conversational messages. Avoid long paragraphs.
+- Ask ONE question at a time. Never ask multiple questions.
+- Occasionally use expressions like: Great 👍, Got it!, Nice!, Thanks for sharing.
 
-**Starter Package — RM 2,500 (one-time)**
-- Single page landing page website
-- Free 3 months support included
-- WhatsApp button integration
-- Google Maps & Google Business setup
-- Mobile responsive design
-- Contact form with email notification
-- Basic local SEO optimization
-- SSL certificate & domain pointing
-- Turnaround: 7–10 working days
+You are currently guiding the user through a consultation flow.
+Current Step: ${session.step}
 
-**Growth Package — RM 4,800 (one-time)** ✦ Best Value
-- Multi-page website (up to 5 pages: Home, About, Services, Contact, Gallery)
-- Free 3 months priority support
-- CMS-ready structure for easy updates
-- Advanced SEO optimization
-- High performance & fast page speed
-- WhatsApp & Google Maps integration
-- Google Analytics setup
-- Custom design (no templates)
-- Turnaround: 15–20 working days
+`;
 
-### 📅 Subscription Packages (Minimum 12-Month Commitment)
+  let stepPrompt = "";
 
-**Single Page Support — RM 280/month**
-- Full single page design & development
-- WhatsApp + Google Maps integration
-- Basic SEO & mobile responsive design
-- Ongoing support included
-- Monthly content updates (text/images)
+  switch (session.step) {
+    case "ASK_BUSINESS_TYPE":
+      stepPrompt = `Acknowledge the user's previous message naturally if needed.
+Then, ask: "First, what kind of business do you run?" (or a natural variation).
+You can give examples: Restaurant, Clinic, Construction, Online store, Others.
+IMPORTANT: You MUST append this exact block at the very end of your response, capturing their PREVIOUS intent if any, otherwise leave it blank:
+[DATA_CAPTURED]
+business_type: 
+[/DATA_CAPTURED]
+Do NOT fill the block with what you are asking for, the block is for extracting the answer to the PREVIOUS question.`;
+      break;
 
-**Multi-Page Support — RM 450/month** ✦ Best Value
-- Up to 5 pages with CMS integration
-- Advanced SEO & Google Analytics
-- Priority support with fast response
-- Quarterly design refreshes
-- Performance monitoring & reporting
+    case "ASK_WEBSITE_GOAL":
+      stepPrompt = `Acknowledge the user's business type naturally (e.g., "Nice! A [business type]...").
+Then ask what the main goal of their website is.
+Provide numbered options:
+1 Get more customers
+2 Show business information
+3 Online booking or appointments
+4 Sell products online
+5 Others (please specify)
+Wait for their reply.
+IMPORTANT: You MUST append this block to extract their business type from their PREVIOUS message:
+[DATA_CAPTURED]
+business_type: <extract their business type here>
+[/DATA_CAPTURED]`;
+      break;
 
-### 🔧 Maintenance Plans (Existing Customers Only)
-- Starter sites: RM 200/month
-- Growth sites: RM 350/month
-- Includes: monthly security patches, minor content updates, 24/7 uptime monitoring, monthly performance reports, priority bug fixes
+    case "ASK_EXISTING_WEBSITE":
+      stepPrompt = `Acknowledge their goal naturally.
+Then ask: "Do you currently have a website?"
+Options: 1 Yes, 2 No, 3 Not sure.
+IMPORTANT: You MUST append this block to extract their website goal from their PREVIOUS message:
+[DATA_CAPTURED]
+website_goal: <extract their website goal here based on the option they chose>
+[/DATA_CAPTURED]`;
+      break;
 
-### 📋 Additional Rates
-- Technical Man-Day Rate: RM 900 (approx. 8 working hours)
-- Emergency After-Hours Support: RM 1,350/man-day
+    case "ASK_PACKAGE":
+      stepPrompt = `Acknowledge their answer naturally.
+Then ask: "What type of website are you looking for?"
+Options:
+1 Simple business website (Single page) - RM 2,500
+2 Multi-page company website (Up to 5 pages) - RM 4,800
+3 Website redesign
+4 Not sure yet
+5 Others (please specify)
+IMPORTANT: You MUST append this block to extract their existing website status from their PREVIOUS message:
+[DATA_CAPTURED]
+existing_website: <Yes/No/Not sure>
+[/DATA_CAPTURED]`;
+      break;
 
-### 💳 Payment Structure
-- 50% upfront deposit to secure project slot
-- 50% balance upon UAT approval before launch
-- Invoices payable within 7 business days
+    case "ASK_TIMELINE":
+      stepPrompt = `Acknowledge their choice naturally.
+Then ask: "When are you planning to launch your website?"
+Options: 1 ASAP, 2 Within 1 month, 3 Within 3 months, 4 Just exploring.
+IMPORTANT: You MUST append this block to extract their package choice from their PREVIOUS message:
+[DATA_CAPTURED]
+package: <extract their package choice>
+[/DATA_CAPTURED]`;
+      break;
 
-### ❌ Not Included (Quoted Separately)
-- Domain registration
-- Hosting services (typically RM 300–500/year via Exabytes or Shinjiru)
-- Third-party API/service costs
-- Email hosting, CDN, SaaS subscriptions
+    case "ASK_NAME":
+      stepPrompt = `Acknowledge their timeline naturally.
+Then say: "Great 👍 To prepare a recommendation for you, may I know your name?"
+IMPORTANT: You MUST append this block to extract their timeline from their PREVIOUS message:
+[DATA_CAPTURED]
+timeline: <extract their timeline: ASAP/1 month/3 months/exploring>
+[/DATA_CAPTURED]`;
+      break;
 
-## FAQ KNOWLEDGE
-- Revisions: 2 rounds of minor revisions per phase. Major structural changes billed at man-day rate.
-- Ownership: Client owns 100% of deliverables upon full payment.
-- Upgrade: Starter → Growth upgrade available at discounted cost based on existing work.
-- Starter uses professional frameworks customized to brand. Growth is 100% custom designed.
-- Target industries: Malaysian SMEs — clinics, workshops, retail, F&B, professional services, contractors, education centers.
+    case "ASK_PHONE":
+      stepPrompt = `Say: "Nice to meet you [Name extracted from their message]."
+Then ask: "What is your mobile number so our team can easily reach you?"
+IMPORTANT: You MUST append this block to extract their name from their PREVIOUS message:
+[DATA_CAPTURED]
+name: <extract their name>
+[/DATA_CAPTURED]`;
+      break;
 
-## LEAD COLLECTION INSTRUCTIONS
-Your secondary goal is collecting lead information. Do this GRADUALLY and NATURALLY in conversation:
+    case "ASK_EMAIL":
+      stepPrompt = `Say: "Thanks!"
+Then ask: "What is the best email address to send your website plan?"
+IMPORTANT: You MUST append this block to extract their phone number from their PREVIOUS message:
+[DATA_CAPTURED]
+phone: <extract their phone number>
+[/DATA_CAPTURED]`;
+      break;
 
-Required fields (collect in order of opportunity):
-1. Full Name
-2. Phone Number (accept ANY format the user provides — do not reject or ask to reformat)
-3. Email Address
-4. Company Name
-5. Which Package they are interested in
-6. Budget Range
-7. Project Timeline
-8. Any specific project message or requirements
+    case "ASK_COMPANY":
+      stepPrompt = `Say: "Thanks!"
+Then ask: "What is your company or business name?"
+IMPORTANT: You MUST append this block to extract their email from their PREVIOUS message:
+[DATA_CAPTURED]
+email: <extract their email>
+[/DATA_CAPTURED]`;
+      break;
 
-RULES for collection:
-- Do NOT ask for all fields at once — that's pushy.
-- Weave questions naturally: "By the way, may I know your name so I can assist you better?"
-- If they mention their company, ask about their website needs.
-- If they show interest in a package, ask about their timeline.
-- Accept ANY phone number format — do NOT ask users to reformat their number.
-- The user has already consented to data collection. No need to ask for permission.
+    case "ASK_MESSAGE":
+      stepPrompt = `Acknowledge their company name.
+Then ask: "Is there anything specific you would like your website to include? For example: Booking system, Online menu, Product catalog, Contact form."
+IMPORTANT: You MUST append this block to extract their company name from their PREVIOUS message:
+[DATA_CAPTURED]
+company: <extract their company name>
+[/DATA_CAPTURED]`;
+      break;
 
-When you have collected at MINIMUM: Name + Phone OR Name + Email, include this EXACT block in your response:
+    case "GENERATE_RECOMMENDATION":
+      stepPrompt = `First, acknowledge their specific feature request.
+IMPORTANT: You MUST append this block to extract their additional message from their PREVIOUS message:
+[DATA_CAPTURED]
+message: <extract their specific features/message>
+[/DATA_CAPTURED]
 
-[LEAD_CAPTURED]
-name: <full name>
-phone: <phone number or "Not provided">
-email: <email or "Not provided">
-company: <company name or "Not provided">
-package: <selected package or "Not specified">
-budget: <budget range or "Not specified">
-timeline: <timeline or "Not specified">
-message: <project notes or "Not specified">
-[/LEAD_CAPTURED]
+THEN, immediately generate a mini consultation based on what they shared so far:
+Business Type: ${session.lead.business_type}
+Goal: ${session.lead.website_goal}
 
-IMPORTANT: Continue the conversation naturally AFTER this block. The user will NOT see the block. Their details will be saved automatically.`;
+Format the recommendation nicely. Example:
+"Thanks [Name]! Based on what you shared:
+Business Type: [Type]
+Goal: [Goal]
+We would recommend a modern mobile-friendly website with:
+• [Feature 1]
+• [Feature 2]
+• [Feature 3]
+This will help customers easily find your [business type] and contact you."
+
+Immediately after the recommendation, send the closing message:
+"Thanks again for sharing your details.
+If you'd like, we can discuss the full website plan with you.
+You can reach us directly here:
+https://wa.me/+60127953577
+
+Looking forward to helping your business grow online 🚀"
+`;
+      break;
+
+    default:
+      stepPrompt = "Conversation complete. Just say thanks and goodbye.";
+  }
+
+  return basePrompt + stepPrompt;
+}
 
 /* ═══════════════════════════════════════════════════
    SANITIZE INPUT
@@ -169,37 +266,32 @@ function sanitize(text: string): string {
 }
 
 /* ═══════════════════════════════════════════════════
-   EXTRACT LEAD DATA FROM GEMINI RESPONSE
+   EXTRACT DATA FROM GEMINI RESPONSE
    ═══════════════════════════════════════════════════ */
-function extractLead(text: string): Record<string, string> | null {
-  const match = text.match(/\[LEAD_CAPTURED\]([\s\S]*?)\[\/LEAD_CAPTURED\]/);
-  if (!match) return null;
+function extractDataFromResponse(text: string): Record<string, string> {
+  const match = text.match(/\[DATA_CAPTURED\]([\s\S]*?)\[\/DATA_CAPTURED\]/);
+  if (!match) return {};
 
-  const lead: Record<string, string> = {};
+  const data: Record<string, string> = {};
   const lines = match[1].trim().split("\n");
   for (const line of lines) {
     const colonIdx = line.indexOf(":");
     if (colonIdx > 0) {
       const key = line.slice(0, colonIdx).trim().toLowerCase();
       const value = line.slice(colonIdx + 1).trim();
-      if (value && value !== "Not provided" && value !== "Not specified") {
-        lead[key] = value;
+      if (value) {
+        data[key] = value;
       }
     }
   }
-
-  // Must have at minimum: name + (phone or email)
-  if (!lead.name) return null;
-  if (!lead.phone && !lead.email) return null;
-
-  return lead;
+  return data;
 }
 
 /* ═══════════════════════════════════════════════════
-   CLEAN RESPONSE — strip lead marker from user view
+   CLEAN RESPONSE — strip data marker from user view
    ═══════════════════════════════════════════════════ */
 function cleanResponse(text: string): string {
-  return text.replace(/\[LEAD_CAPTURED\][\s\S]*?\[\/LEAD_CAPTURED\]/g, "").trim();
+  return text.replace(/\[DATA_CAPTURED\][\s\S]*?\[\/DATA_CAPTURED\]/g, "").trim();
 }
 
 /* ═══════════════════════════════════════════════════
@@ -220,7 +312,11 @@ export async function POST(request: NextRequest) {
   }
 
   // ── Parse Body ──
-  let body: { messages?: { role: string; content: string }[]; honeypot?: string };
+  let body: { 
+    messages?: { role: string; content: string }[]; 
+    session?: ChatSession;
+    honeypot?: string;
+  };
   try {
     body = await request.json();
   } catch {
@@ -232,13 +328,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reply: "Thank you for your message!" });
   }
 
-  // ── Validate Messages ──
+  // ── Validation ──
   const messages = body.messages;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ reply: "Please type a message." }, { status: 400 });
   }
+  const session = body.session || { 
+    step: "ASK_BUSINESS_TYPE" as ChatStep, 
+    lead: { name: "", phone: "", email: "", company: "", business_type: "", website_goal: "", existing_website: "", package: "", timeline: "", message: "", lead_score: 0, timestamp: "" } 
+  };
 
-  // ── Message Length Check ──
   const latest = messages[messages.length - 1];
   if (!latest?.content || typeof latest.content !== "string") {
     return NextResponse.json({ reply: "Invalid message format." }, { status: 400 });
@@ -267,7 +366,7 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-3.1-flash-lite-preview",
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: generateSystemPrompt(session),
     });
 
     // Gemini requires history to start with 'user' role
@@ -280,34 +379,54 @@ export async function POST(request: NextRequest) {
     const result = await chat.sendMessage(lastMsg.parts[0].text);
     const rawReply = result.response.text();
 
-    // ── Lead Detection ──
-    const leadData = extractLead(rawReply);
+    // ── Update State and Lead Data ──
+    const extracted = extractDataFromResponse(rawReply);
     const displayReply = cleanResponse(rawReply);
+
+    let nextStep = session.step;
+
+    // Apply extracted data to lead and adjust score
+    if (Object.keys(extracted).length > 0) {
+      nextStep = getNextStep(session.step);
+
+      for (const [key, value] of Object.entries(extracted)) {
+        if (key in session.lead && value && value.toLowerCase() !== "null" && value.toLowerCase() !== "undefined") {
+          (session.lead as any)[key] = value;
+          
+          // Apply Scoring rules
+          if (key === "timeline" && value.toLowerCase().includes("asap")) {
+            session.lead.lead_score += 5;
+          }
+          if (key === "company") {
+            session.lead.lead_score += 3;
+          }
+          if (key === "message" && value.length > 5) {
+            session.lead.lead_score += 2;
+          }
+          if (key === "business_type") {
+            session.lead.lead_score += 2;
+          }
+        }
+      }
+    } else if (session.step === "GENERATE_RECOMMENDATION") {
+      // Special case: recommendation generated, move to COMPLETE
+      nextStep = getNextStep(session.step);
+    }
+
+    session.step = nextStep;
+    session.lead.timestamp = new Date().toISOString();
 
     return NextResponse.json({
       reply: displayReply,
-      leadCaptured: !!leadData,
-      leadData: leadData || undefined,
+      session,
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     console.error("[Chat] Gemini error:", errorMsg);
-    if (err instanceof Error && err.stack) {
-      console.error("[Chat] Stack:", err.stack);
-    }
 
-    // Check for quota errors
     if (errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
       return NextResponse.json({
         reply: "I'm currently experiencing high demand. Please try again in a minute, or contact us via WhatsApp: https://wa.me/60127953577",
-      });
-    }
-
-    // Check for model not found
-    if (errorMsg.includes("404") || errorMsg.includes("not found") || errorMsg.includes("NOT_FOUND")) {
-      console.error("[Chat] Model not found. Check the model name in route.ts");
-      return NextResponse.json({
-        reply: "Our chatbot is being updated. Please contact us via WhatsApp: https://wa.me/60127953577",
       });
     }
 
